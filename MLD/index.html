@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MLD - Cartographie du Patrimoine Urbain</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    h1 { color: #2c3e50; text-decoration: underline; margin-bottom: 40px; }
+
+    /* Conteneur Grille pour les tables */
+    .schema-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+        gap: 30px;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    /* Style d'une Table (Relation) */
+    .table-box {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid #dfe6e9;
+    }
+
+    /* En-tête de la table (Nom) */
+    .table-header {
+        background-color: #34495e;
+        color: white;
+        padding: 12px;
+        font-weight: bold;
+        text-align: center;
+        text-transform: uppercase;
+        border-bottom: 3px solid #2c3e50;
+    }
+
+    /* Liste des attributs */
+    .table-content {
+        padding: 15px;
+    }
+
+    .attribute {
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+
+    .attribute:last-child { border-bottom: none; }
+
+    /* Clé Primaire (PK) */
+    .pk {
+        font-weight: bold;
+        color: #c0392b;
+        text-decoration: underline;
+        margin-right: 8px;
+    }
+    .pk::before { content: "🔑 "; } /* Petite icône */
+
+    /* Clé Étrangère (FK) */
+    .fk {
+        font-style: italic;
+        color: #2980b9;
+        margin-right: 8px;
+    }
+    .fk::before { content: "# "; font-weight: bold; }
+
+    /* Commentaire pour expliquer la FK */
+    .fk-desc {
+        font-size: 11px;
+        color: #7f8c8d;
+        margin-left: auto;
+    }
+
+    /* Table Centrale mise en valeur */
+    .central-table {
+        border: 2px solid #e67e22;
+    }
+    .central-table .table-header { background-color: #e67e22; }
+
+</style>
+</head>
+<body>
+
+<h1>Modèle Logique de Données (MLD)</h1>
+
+<div class="schema-container">
+
+    <div class="table-box">
+        <div class="table-header">ZONE_URBAINE</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Zone</span></div>
+            <div class="attribute">Nom_Zone</div>
+            <div class="attribute">Type_Zone</div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">TYPE_BÂTIMENT</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Type</span></div>
+            <div class="attribute">Libelle_Type</div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">NIV_PROTECTION</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Protection</span></div>
+            <div class="attribute">Niveau</div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">PROPRIÉTAIRE</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Proprio</span></div>
+            <div class="attribute">Nom_Complet</div>
+            <div class="attribute">Contact</div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">PRESTATAIRE</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Prestataire</span></div>
+            <div class="attribute">Nom_Entreprise</div>
+            <div class="attribute">Role</div>
+        </div>
+    </div>
+
+    <div class="table-box central-table">
+        <div class="table-header">BÂTIMENT</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">Code_Batiment</span></div>
+            <div class="attribute">Nom_Batiment</div>
+            <div class="attribute">Adresse_Rue</div>
+            <div class="attribute">Latitude</div>
+            <div class="attribute">Longitude</div>
+            <div class="attribute">Date_Construction</div>
+            <div class="attribute">Note_Historique</div>
+            
+            <div class="attribute"><span class="fk">ID_Zone</span> <span class="fk-desc">(Réf. Zone)</span></div>
+            <div class="attribute"><span class="fk">ID_Type</span> <span class="fk-desc">(Réf. Type)</span></div>
+            <div class="attribute"><span class="fk">ID_Protection</span> <span class="fk-desc">(Réf. Protection)</span></div>
+            <div class="attribute"><span class="fk">ID_Proprio</span> <span class="fk-desc">(Réf. Propriétaire)</span></div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">INSPECTION</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Inspect</span></div>
+            <div class="attribute">Date_Visite</div>
+            <div class="attribute">Etat_Constate</div>
+            <div class="attribute"><span class="fk">Code_Batiment</span> <span class="fk-desc">(Concerne quel bât?)</span></div>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <div class="table-header">INTERVENTION</div>
+        <div class="table-content">
+            <div class="attribute"><span class="pk">ID_Interv</span></div>
+            <div class="attribute">Date_Debut</div>
+            <div class="attribute">Type_Travaux</div>
+            <div class="attribute">Cout_Estime</div>
+            
+            <div class="attribute"><span class="fk">Code_Batiment</span> <span class="fk-desc">(Sur quel bât?)</span></div>
+            
+            <div class="attribute"><span class="fk">ID_Prestataire</span> <span class="fk-desc">(Réalisé par qui?)</span></div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

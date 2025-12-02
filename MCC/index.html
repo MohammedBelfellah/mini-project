@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MCC - Cartographie du patrimoine urbain</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f6f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    h1 { color: #333; margin-bottom: 40px; }
+
+    /* Conteneur principal du dessin */
+    .mcc-container {
+        position: relative;
+        width: 800px;
+        height: 500px;
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    /* --- LES ACTEURS --- */
+    
+    /* Style commun pour les bulles */
+    .actor {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-weight: bold;
+        border: 2px solid #555;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        z-index: 2;
+    }
+
+    /* Acteur INTERNE (Le Système) - Comme 'Assureur' dans votre exemple */
+    .actor-internal {
+        width: 160px;
+        height: 100px;
+        background-color: #ffcc00; /* Jaune/Orange */
+        border-radius: 50%; /* Ovale */
+        left: 320px; /* Au centre */
+        top: 200px;
+    }
+
+    /* Acteurs EXTERNES - Comme 'Client/Garage' */
+    .actor-external {
+        width: 140px;
+        height: 80px;
+        background-color: white;
+        border-radius: 50%; /* Ovale */
+    }
+
+    /* Positions spécifiques des externes */
+    .ext-prestataire {
+        top: 50px;
+        left: 330px; /* En haut */
+    }
+
+    .ext-citoyen {
+        top: 200px;
+        left: 50px; /* À gauche */
+    }
+
+    .ext-proprietaire {
+        top: 200px;
+        right: 50px; /* À droite */
+    }
+
+    .ext-municipalite {
+        bottom: 50px;
+        left: 330px; /* En bas */
+    }
+
+    /* Labels INTERNE / EXTERNE à côté des bulles */
+    .label-type {
+        position: absolute;
+        font-size: 12px;
+        color: #666;
+        font-style: italic;
+    }
+
+    /* --- LES FLUX (SVG) --- */
+    svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1; /* Derrière les bulles */
+        pointer-events: none;
+    }
+
+    /* Style des flèches */
+    .arrow-line {
+        stroke: #333;
+        stroke-width: 1.5;
+        fill: none;
+    }
+
+    /* Texte sur les flèches */
+    .flux-label {
+        font-size: 11px;
+        font-family: Arial, sans-serif;
+        fill: #333;
+        background-color: white; /* Fond blanc pour lisibilité */
+    }
+
+    /* Définition des pointes de flèches (marker) dans le SVG */
+
+</style>
+</head>
+<body>
+
+    <h1>Modèle Conceptuel de Communication (MCC)</h1>
+
+    <div class="mcc-container">
+        
+        <svg>
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                </marker>
+            </defs>
+
+            <line x1="380" y1="130" x2="380" y2="195" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="390" y="170" class="flux-label">Rapports techniques / Devis</text>
+
+            <line x1="420" y1="200" x2="420" y2="135" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="430" y="160" class="flux-label">Ordre de service</text>
+
+            <line x1="195" y1="230" x2="315" y2="230" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="210" y="225" class="flux-label">Signalement / Demande</text>
+
+            <line x1="315" y1="250" x2="195" y2="250" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="220" y="265" class="flux-label">Notification décision</text>
+
+            <line x1="485" y1="240" x2="605" y2="240" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="500" y="235" class="flux-label">Avis de classement</text>
+
+            <line x1="605" y1="260" x2="485" y2="260" class="arrow-line" marker-end="url(#arrowhead)"/>
+            <text x="510" y="275" class="flux-label">Documents / Accord</text>
+        </svg>
+
+        <div class="actor actor-external ext-prestataire">
+            Prestataires<br>
+            <span style="font-weight:normal; font-size:10px;">(Architectes, Entreprises)</span>
+        </div>
+        <div class="label-type" style="top: 80px; left: 480px;">externe</div>
+
+        <div class="actor actor-external ext-citoyen">
+            Citoyens /<br>Associations
+        </div>
+        <div class="label-type" style="top: 290px; left: 80px;">externe</div>
+
+        <div class="actor actor-internal">
+            SERVICE<br>PATRIMOINE
+        </div>
+        <div class="label-type" style="top: 240px; left: 270px;">interne</div>
+
+        <div class="actor actor-external ext-proprietaire">
+            Propriétaires<br>
+            <span style="font-weight:normal; font-size:10px;">(Privés/Publics)</span>
+        </div>
+        <div class="label-type" style="top: 290px; right: 80px;">externe</div>
+
+    </div>
+
+    <div style="margin-top:20px; font-size:14px; color:#555;">
+        B.luise
+        
+    </div>
+
+</body>
+</html>

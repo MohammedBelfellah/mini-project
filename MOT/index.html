@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MOT Final - Cartographie Patrimoine</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f4f7f6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    h1 { color: #2c3e50; text-decoration: underline; margin-bottom: 20px; }
+
+    /* --- CONTENEUR GLOBAL --- */
+    .mot-container {
+        position: relative;
+        width: 1200px;  /* Largeur totale */
+        height: 1150px; /* Hauteur totale */
+        background-color: white;
+        border: 2px solid #333;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* --- EN-TÊTES --- */
+    /* Bannière "Service Municipal" couvrant les 3 acteurs internes */
+    .super-header {
+        position: absolute; top: 0; left: 0; width: 840px; height: 35px;
+        background-color: #2c3e50; color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; letter-spacing: 1px; border-right: 2px solid #333;
+    }
+
+    .col-header {
+        position: absolute; top: 35px; height: 45px;
+        border-bottom: 2px solid #333;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; background-color: #ecf0f1; font-size: 13px;
+        z-index: 2; text-align: center; line-height: 1.2;
+    }
+
+    /* Lignes verticales de séparation */
+    .vertical-line {
+        position: absolute; top: 0; bottom: 0; width: 2px;
+        background-color: #333; z-index: 1;
+    }
+
+    /* --- DIMENSIONS DES COLONNES --- */
+    /* 1. Secrétaire (0px -> 280px) */
+    #head-secr { left: 0; width: 280px; }
+    #line-1 { left: 280px; }
+
+    /* 2. Chef (280px -> 560px) */
+    #head-chef { left: 282px; width: 278px; }
+    #line-2 { left: 560px; }
+
+    /* 3. Géomaticien (560px -> 840px) */
+    #head-geo { left: 562px; width: 278px; background-color: #eaf2f8; } 
+    #line-3 { left: 840px; }
+
+    /* 4. Nature (840px -> 1020px) */
+    #head-nature { left: 842px; top: 0; height: 80px; width: 178px; background-color: #bdc3c7;} 
+    #line-4 { left: 1020px; }
+
+    /* 5. Temps (1020px -> 1200px) */
+    #head-temps { left: 1022px; top: 0; height: 80px; width: 178px; background-color: #bdc3c7;}
+
+
+    /* --- LES TÂCHES (BOÎTES) --- */
+    .task-box {
+        position: absolute; width: 200px;
+        background-color: #fff; border: 1px solid #333;
+        padding: 10px; box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        z-index: 10; font-size: 12px; border-radius: 4px;
+    }
+    .task-title { font-weight: bold; color: #d35400; display: block; margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 2px;}
+
+    /* Texte dans les colonnes Nature et Temps */
+    .info-text {
+        position: absolute; font-size: 12px; color: #333;
+        width: 170px; text-align: center;
+    }
+
+    /* --- ÉLÉMENTS SPÉCIAUX --- */
+    /* Inputs externes (Propriétaire, Prestataire) */
+    .external-input {
+        position: absolute; font-style: italic; color: #555; font-size: 11px;
+        background: #fdfefe; border: 1px dashed #7f8c8d; padding: 5px; border-radius: 4px; z-index: 5;
+    }
+
+    /* Point d'arrêt (Fin si rejet) */
+    .stop-node {
+        position: absolute; width: 40px; height: 40px; border-radius: 50%;
+        background: #c0392b; color: white; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; font-size: 11px; z-index: 10; border: 3px solid #922b21;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Barre de Synchronisation */
+    .sync-bar {
+        position: absolute; height: 6px; width: 120px; background-color: #2c3e50;
+        z-index: 10; border-radius: 3px;
+    }
+
+    /* --- SVG (FLÈCHES) --- */
+    svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+    .arrow-line { stroke: #333; stroke-width: 2; fill: none; }
+    .label-path { font-size: 12px; fill: #2980b9; font-weight: bold; background: white; padding: 2px;}
+
+    /* --- POSITIONNEMENT PRÉCIS --- */
+    
+    /* PHASE 1: Secrétaire (Centre colonne = 140px) */
+    /* Boite fait 200px de large -> Left = 140 - 100 = 40px */
+    #ext-1 { top: 100px; left: 10px; }
+    #task-1 { top: 130px; left: 40px; } 
+    #nat-1 { top: 140px; left: 845px; }
+    #tmp-1 { top: 140px; left: 1025px; }
+
+    /* PHASE 2: Chef (Centre colonne = 420px) */
+    /* Left = 420 - 100 = 320px */
+    #task-2 { top: 280px; left: 320px; }
+    #nat-2 { top: 290px; left: 845px; }
+    #tmp-2 { top: 290px; left: 1025px; }
+    
+    /* STOP NODE */
+    #stop-1 { top: 350px; left: 500px; } /* Décalé à droite */
+
+    /* PHASE 3: Géomaticien (Centre colonne = 700px) */
+    /* Left = 700 - 100 = 600px */
+    #task-3 { top: 450px; left: 600px; border-color: #2980b9; }
+    #nat-3 { top: 460px; left: 845px; }
+    #tmp-3 { top: 460px; left: 1025px; }
+
+    /* PHASE 4: Chef (Centre = 420px) */
+    /* Left = 320px */
+    #task-4 { top: 650px; left: 320px; }
+    #nat-4 { top: 660px; left: 845px; }
+    #tmp-4 { top: 660px; left: 1025px; }
+
+    /* SYNC & EXTERNE */
+    #ext-2 { top: 780px; left: 100px; } /* Prestataire */
+    #sync-point { top: 820px; left: 360px; } /* Centré sur Chef (420 - 60 = 360) */
+
+    /* PHASE 5: Chef (Centre = 420px) */
+    #task-5 { top: 880px; left: 320px; }
+    #nat-5 { top: 890px; left: 845px; }
+    #tmp-5 { top: 890px; left: 1025px; }
+
+</style>
+</head>
+<body>
+
+<h1>MOT : Cartographie du Patrimoine Urbain (Avec Géomaticien)</h1>
+
+<div class="mot-container">
+
+    <div class="super-header">SERVICE MUNICIPAL DU PATRIMOINE</div>
+
+    <div id="head-secr" class="col-header">SECRÉTAIRE<br>(Saisie)</div>
+    <div id="head-chef" class="col-header">CHEF DE SERVICE<br>(Validation)</div>
+    <div id="head-geo" class="col-header">GÉOMATICIEN<br>(Technique/SIG)</div>
+    
+    <div id="head-nature" class="col-header">NATURE</div>
+    <div id="head-temps" class="col-header">TEMPS</div>
+
+    <div id="line-1" class="vertical-line"></div>
+    <div id="line-2" class="vertical-line"></div>
+    <div id="line-3" class="vertical-line"></div>
+    <div id="line-4" class="vertical-line"></div>
+
+
+    <div id="ext-1" class="external-input">De: Propriétaire / Assoc.<br>(Dossier Papier)</div>
+    
+    <div id="task-1" class="task-box">
+        <span class="task-title">1. Saisie Demande</span>
+        - Réception physique<br>
+        - Vérification pièces<br>
+        - Création fiche (Provisoire)
+    </div>
+    <div id="nat-1" class="info-text">Conversationnel</div>
+    <div id="tmp-1" class="info-text">Immédiat</div>
+
+
+    <div id="task-2" class="task-box">
+        <span class="task-title">2. Instruction Dossier</span>
+        - Analyse historique<br>
+        - <b>DÉCISION DU CHEF</b>
+    </div>
+    <div id="nat-2" class="info-text">Conversationnel</div>
+    <div id="tmp-2" class="info-text">J+1</div>
+
+    <div id="stop-1" class="stop-node">FIN</div>
+
+
+    <div id="task-3" class="task-box" style="background-color: #fbfdff;">
+        <span class="task-title" style="color:#2980b9;">3. Visite & Saisie SIG</span>
+        - Inspection Terrain<br>
+        - Relevé GPS & Photos<br>
+        - Rapport État
+    </div>
+    <div id="nat-3" class="info-text">Manuel + Mobile</div>
+    <div id="tmp-3" class="info-text">Selon Planning</div>
+
+
+    <div id="task-4" class="task-box">
+        <span class="task-title">4. Lancement Travaux</span>
+        - Si état critique<br>
+        - Émission Ordre Service (OS)<br>
+        - Suivi prestataire
+    </div>
+    <div id="nat-4" class="info-text">Conversationnel</div>
+    <div id="tmp-4" class="info-text">Sur Alerte</div>
+
+
+    <div id="ext-2" class="external-input" style="border-color: #27ae60; color: #27ae60;">
+        De: Prestataire<br><b>(Rapport Fin Travaux)</b>
+    </div>
+    
+    <div id="sync-point" class="sync-bar"></div>
+
+
+    <div id="task-5" class="task-box">
+        <span class="task-title">5. Validation Finale</span>
+        - Vérification conformité<br>
+        - Validation Facture<br>
+        - Bâtiment -> "Restauré"
+    </div>
+    <div id="nat-5" class="info-text">Conversationnel</div>
+    <div id="tmp-5" class="info-text">Fin Chantier</div>
+
+
+    <svg>
+        <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+            </marker>
+        </defs>
+
+        <path d="M140,200 L140,230 L420,230 L420,280" class="arrow-line" marker-end="url(#arrow)"/>
+
+        <path d="M520,320 L520,350" class="arrow-line" marker-end="url(#arrow)" style="stroke:#c0392b;"/>
+        <text x="525" y="340" class="label-path" style="fill:#c0392b;">NON</text>
+
+        <path d="M420,350 L420,400 L700,400 L700,450" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="560" y="395" class="label-path">OK</text>
+
+        <path d="M700,530 L700,580 L420,580 L420,650" class="arrow-line" marker-end="url(#arrow)"/>
+
+        <path d="M420,735 L420,820" class="arrow-line" marker-end="url(#arrow)"/>
+        <text x="425" y="780" class="label-path">Travaux Finis</text>
+
+        <path d="M220,800 L360,820" class="arrow-line" marker-end="url(#arrow)" stroke-dasharray="5,5"/>
+
+        <path d="M420,826 L420,880" class="arrow-line" marker-end="url(#arrow)"/>
+
+    </svg>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MCT Complet - Cartographie Patrimoine</title>
+    <style>
+      /* --- STYLE GÉNÉRAL --- */
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: #eef2f5;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        color: #2c3e50;
+        text-decoration: underline;
+        margin-bottom: 40px;
+      }
+      h3 {
+        color: #e67e22;
+        margin-bottom: 10px;
+        margin-top: 0;
+      }
+
+      /* Conteneur pour chaque MCT */
+      .mct-section {
+        background-color: white;
+        padding: 30px;
+        margin-bottom: 50px; /* Espace entre les diagrammes */
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 700px;
+        position: relative;
+      }
+
+      /* Indicateur de flux entre les processus */
+      .flow-arrow {
+        font-size: 50px;
+        color: #bdc3c7;
+        margin: -40px 0 10px 0;
+      }
+
+      /* --- FORMES MERISE --- */
+      .event-circle {
+        width: 110px;
+        height: 110px;
+        border: 2px solid #2c3e50;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+        background: white;
+        z-index: 2;
+        padding: 5px;
+      }
+
+      .operation-table {
+        border-collapse: collapse;
+        width: 550px;
+        border: 3px solid #2c3e50;
+        margin: 10px 0;
+        background: white;
+        z-index: 2;
+      }
+
+      .operation-table td {
+        border: 2px solid #2c3e50;
+        padding: 8px;
+      }
+
+      .op-header {
+        text-align: center;
+        font-weight: bold;
+        background-color: #ecf0f1;
+        font-size: 14px;
+      }
+
+      .op-body {
+        text-align: left;
+        vertical-align: top;
+        height: 70px;
+        font-size: 13px;
+      }
+
+      .op-rules {
+        text-align: center;
+        font-weight: bold;
+        background-color: #ecf0f1;
+        width: 50%;
+        font-size: 13px;
+      }
+
+      /* --- CONNECTEURS --- */
+      .row-events {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        position: relative;
+        padding-bottom: 10px;
+      }
+
+      /* Synchronisation (Barre et triangle) */
+      .sync-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 40px;
+        position: relative;
+        margin-top: -10px;
+        margin-bottom: 5px;
+      }
+
+      .sync-line-horiz {
+        width: 60%;
+        border-bottom: 3px solid #2c3e50;
+        position: absolute;
+        top: 0;
+      }
+
+      .sync-triangle {
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 15px solid #2c3e50;
+        margin-top: 0; /* Colle à la barre */
+        position: relative;
+        z-index: 1;
+      }
+
+      .sync-label {
+        position: absolute;
+        top: -20px;
+        background: white;
+        padding: 0 5px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .arrow-down-simple {
+        font-size: 30px;
+        color: #2c3e50;
+        margin-top: -10px;
+        z-index: 0;
+      }
+
+      /* Lignes de sortie diagonales */
+      .output-lines {
+        position: relative;
+        width: 100%;
+        height: 40px;
+        margin-top: -5px;
+      }
+
+      .line-left {
+        position: absolute;
+        left: 25%;
+        height: 40px;
+        width: 2px;
+        background: #2c3e50;
+        transform: skewX(20deg);
+      }
+      .line-right {
+        position: absolute;
+        right: 25%;
+        height: 40px;
+        width: 2px;
+        background: #2c3e50;
+        transform: skewX(-20deg);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>MCT : PROJET CARTOGRAPHIE PATRIMOINE URBAIN</h1>
+
+    <div class="mct-section">
+      <h3>1. Processus d'Inventaire et Classement</h3>
+
+      <div class="row-events">
+        <div class="event-circle">Découverte<br />nouveau site</div>
+        <div class="event-circle">
+          Demande<br />d'inscription<br />(Citoyen/Assoc)
+        </div>
+      </div>
+
+      <div class="sync-container">
+        <div class="sync-line-horiz"></div>
+        <div class="sync-label">OU</div>
+        <div class="sync-triangle"></div>
+        <div class="arrow-down-simple">↓</div>
+      </div>
+
+      <table class="operation-table">
+        <tr>
+          <td class="op-header" style="width: 15%">OP 01</td>
+          <td class="op-header">INSTRUCTION DE LA DEMANDE (Spec 1, 2, 3)</td>
+        </tr>
+        <tr>
+          <td colspan="2" class="op-body">
+            - Vérification de la valeur historique et culturelle.<br />
+            - Relevé coordonnées GPS (Lat/Long) et adresse.<br />
+            - Identification propriétaire et type (Religieux, Civil...).
+          </td>
+        </tr>
+        <tr>
+          <td class="op-rules">R1 : Dossier Validé</td>
+          <td class="op-rules">R2 : Rejet / Hors sujet</td>
+        </tr>
+      </table>
+
+      <div class="output-lines">
+        <div class="line-left"></div>
+        <div class="line-right"></div>
+      </div>
+
+      <div class="row-events">
+        <div class="event-circle" style="border-color: green; color: green">
+          Bâtiment<br />Classé et<br />Inventorié
+        </div>
+        <div class="event-circle" style="border-color: red; color: red">
+          Demande<br />Rejetée
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">⬇</div>
+
+    <div class="mct-section">
+      <h3>2. Processus de Surveillance (Spec 5, 9)</h3>
+
+      <div class="row-events">
+        <div class="event-circle">Date de visite<br />périodique</div>
+        <div class="event-circle">Signalement<br />d'une dégradation</div>
+      </div>
+
+      <div class="sync-container">
+        <div class="sync-line-horiz"></div>
+        <div class="sync-label">OU</div>
+        <div class="sync-triangle"></div>
+        <div class="arrow-down-simple">↓</div>
+      </div>
+
+      <table class="operation-table">
+        <tr>
+          <td class="op-header" style="width: 15%">OP 02</td>
+          <td class="op-header">INSPECTION DE L'ÉTAT</td>
+        </tr>
+        <tr>
+          <td colspan="2" class="op-body">
+            - Visite technique sur le terrain.<br />
+            - Prise de photos (Spec 10).<br />
+            - Qualification état : Bon, Moyen, Dégradé ou Ruine.
+          </td>
+        </tr>
+        <tr>
+          <td class="op-rules">R1 : État Correct</td>
+          <td class="op-rules">R2 : État Critique</td>
+        </tr>
+      </table>
+
+      <div class="output-lines">
+        <div class="line-left"></div>
+        <div class="line-right"></div>
+      </div>
+
+      <div class="row-events">
+        <div class="event-circle">Mise à jour<br />Fiche technique</div>
+        <div class="event-circle" style="background-color: #ffe6e6">
+          <b>Alerte<br />Restauration</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-arrow">⬇</div>
+
+    <div class="mct-section">
+      <h3>3. Processus de Restauration (Spec 6, 7, 8)</h3>
+
+      <div class="row-events">
+        <div class="event-circle" style="background-color: #ffe6e6">
+          Alerte<br />Restauration
+        </div>
+        <div class="event-circle">Budget<br />Alloué</div>
+      </div>
+
+      <div class="sync-container">
+        <div class="sync-line-horiz"></div>
+        <div class="sync-label">ET</div>
+        <div class="sync-triangle"></div>
+        <div class="arrow-down-simple">↓</div>
+      </div>
+
+      <table class="operation-table">
+        <tr>
+          <td class="op-header" style="width: 15%">OP 03</td>
+          <td class="op-header">RÉALISATION DES TRAVAUX</td>
+        </tr>
+        <tr>
+          <td colspan="2" class="op-body">
+            - Choix prestataire (Spec 7).<br />
+            - Exécution des travaux.<br />
+            - Validation du rapport technique par la municipalité (Spec 8).
+          </td>
+        </tr>
+        <tr>
+          <td class="op-rules">R1 : Travaux Validés</td>
+          <td class="op-rules">R2 : Non Conforme</td>
+        </tr>
+      </table>
+
+      <div class="output-lines">
+        <div class="line-left"></div>
+        <div class="line-right"></div>
+      </div>
+
+      <div class="row-events">
+        <div class="event-circle" style="border-color: green">
+          Bâtiment<br />Restauré<br />(Retour État "Bon")
+        </div>
+        <div class="event-circle" style="border-color: orange">
+          Contentieux<br />Prestataire
+        </div>
+      </div>
+    </div>
+    <div>B.luise</div>
+  </body>
+</html>

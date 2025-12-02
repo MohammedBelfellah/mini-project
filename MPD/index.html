@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>MPD - Cartographie du Patrimoine</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    /* Titres demandés */
+    h1 { color: #2c3e50; margin-bottom: 5px; text-decoration: underline; }
+    h2 { color: #555; font-weight: normal; font-size: 18px; margin-top: 0; margin-bottom: 20px; }
+
+    /* Conteneur du code */
+    .code-container {
+        position: relative;
+        width: 900px;
+        background-color: #282c34; /* Fond sombre */
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    /* En-tête du bloc */
+    .code-header {
+        background-color: #21252b;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #181a1f;
+    }
+
+    .lang-label { color: #abb2bf; font-weight: bold; font-size: 14px; }
+
+    /* Bouton Copier */
+    .copy-btn {
+        background-color: #e67e22;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .copy-btn:hover { background-color: #d35400; }
+
+    /* Zone SQL */
+    pre { margin: 0; padding: 20px; overflow-x: auto; white-space: pre-wrap; }
+    code { font-family: 'Consolas', monospace; color: #abb2bf; font-size: 14px; line-height: 1.5; }
+
+    /* Syntaxe SQL */
+    .sql-key { color: #c678dd; font-weight: bold; }
+    .sql-type { color: #e5c07b; }
+    .sql-name { color: #61afef; }
+    .sql-comment { color: #7f8c8d; font-style: italic; }
+
+</style>
+</head>
+<body>
+
+<h1>Modèle Physique de Données (MPD)</h1>
+<h2>Script de création de la base de données pour PostgreSQL.</h2>
+
+<div class="code-container">
+    <div class="code-header">
+        <span class="lang-label">Script SQL</span>
+        <button class="copy-btn" onclick="copyCode()">📋 Copier le Code</button>
+    </div>
+
+    <pre><code id="sql-code">
+<span class="sql-comment">-- =============================================
+-- 1. TABLES DE RÉFÉRENCE (Listes déroulantes)
+-- =============================================</span>
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">ZONE_URBAINE</span> (
+    <span class="sql-name">id_zone</span>      <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">nom_zone</span>     <span class="sql-type">VARCHAR(100)</span> <span class="sql-key">NOT NULL</span>,
+    <span class="sql-name">type_zone</span>    <span class="sql-type">VARCHAR(50)</span>  <span class="sql-comment">-- Ex: Quartier, Secteur</span>
+);
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">TYPE_BATIMENT</span> (
+    <span class="sql-name">id_type</span>      <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">libelle_type</span> <span class="sql-type">VARCHAR(100)</span> <span class="sql-key">NOT NULL</span> <span class="sql-comment">-- Ex: Religieux, Civil</span>
+);
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">NIV_PROTECTION</span> (
+    <span class="sql-name">id_protection</span> <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">niveau</span>        <span class="sql-type">VARCHAR(50)</span> <span class="sql-key">NOT NULL</span> <span class="sql-comment">-- Ex: Classé, Inscrit</span>
+);
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">PROPRIETAIRE</span> (
+    <span class="sql-name">id_proprio</span>   <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">nom_complet</span>  <span class="sql-type">VARCHAR(150)</span> <span class="sql-key">NOT NULL</span>,
+    <span class="sql-name">type_proprio</span> <span class="sql-type">VARCHAR(50)</span>, <span class="sql-comment">-- Public, Privé</span>
+    <span class="sql-name">contact</span>      <span class="sql-type">VARCHAR(100)</span>
+);
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">PRESTATAIRE</span> (
+    <span class="sql-name">id_prestataire</span> <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">nom_entreprise</span> <span class="sql-type">VARCHAR(150)</span> <span class="sql-key">NOT NULL</span>,
+    <span class="sql-name">role_prest</span>     <span class="sql-type">VARCHAR(100)</span> <span class="sql-comment">-- Architecte, Entreprise BTP</span>
+);
+
+<span class="sql-comment">-- =============================================
+-- 2. TABLE CENTRALE : BATIMENT
+-- =============================================</span>
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">BATIMENT</span> (
+    <span class="sql-name">code_batiment</span>     <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">nom_batiment</span>      <span class="sql-type">VARCHAR(150)</span>,
+    <span class="sql-name">adresse_rue</span>       <span class="sql-type">VARCHAR(255)</span>,
+    <span class="sql-name">latitude</span>          <span class="sql-type">DECIMAL(9,6)</span>,
+    <span class="sql-name">longitude</span>         <span class="sql-type">DECIMAL(9,6)</span>,
+    <span class="sql-name">date_construction</span> <span class="sql-type">DATE</span>,
+    <span class="sql-name">note_historique</span>   <span class="sql-type">TEXT</span>,
+    
+    <span class="sql-comment">-- Clés étrangères (Relations 1,1)</span>
+    <span class="sql-name">id_zone</span>       <span class="sql-type">INT</span> <span class="sql-key">REFERENCES</span> ZONE_URBAINE(id_zone),
+    <span class="sql-name">id_type</span>       <span class="sql-type">INT</span> <span class="sql-key">REFERENCES</span> TYPE_BATIMENT(id_type),
+    <span class="sql-name">id_protection</span> <span class="sql-type">INT</span> <span class="sql-key">REFERENCES</span> NIV_PROTECTION(id_protection),
+    <span class="sql-name">id_proprio</span>    <span class="sql-type">INT</span> <span class="sql-key">REFERENCES</span> PROPRIETAIRE(id_proprio)
+);
+
+<span class="sql-comment">-- =============================================
+-- 3. TABLES ÉVÉNEMENTS (Historique)
+-- =============================================</span>
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">INSPECTION</span> (
+    <span class="sql-name">id_inspect</span>    <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">date_visite</span>   <span class="sql-type">DATE</span> <span class="sql-key">NOT NULL</span>,
+    <span class="sql-name">rapport</span>       <span class="sql-type">TEXT</span>,
+    <span class="sql-name">etat_constate</span> <span class="sql-type">VARCHAR(50)</span>, <span class="sql-comment">-- Bon, Moyen, Dégradé...</span>
+    <span class="sql-name">code_batiment</span> <span class="sql-type">INT</span> <span class="sql-key">NOT NULL REFERENCES</span> BATIMENT(code_batiment)
+);
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">INTERVENTION</span> (
+    <span class="sql-name">id_interv</span>    <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">date_debut</span>   <span class="sql-type">DATE</span>,
+    <span class="sql-name">date_fin</span>     <span class="sql-type">DATE</span>,
+    <span class="sql-name">type_travaux</span> <span class="sql-type">VARCHAR(255)</span>,
+    <span class="sql-name">cout_estime</span>  <span class="sql-type">DECIMAL(12,2)</span>,
+    <span class="sql-name">est_validee</span>  <span class="sql-type">BOOLEAN</span> <span class="sql-key">DEFAULT</span> FALSE,
+    
+    <span class="sql-name">code_batiment</span>  <span class="sql-type">INT</span> <span class="sql-key">NOT NULL REFERENCES</span> BATIMENT(code_batiment),
+    <span class="sql-name">id_prestataire</span> <span class="sql-type">INT</span> <span class="sql-key">NOT NULL REFERENCES</span> PRESTATAIRE(id_prestataire)
+);
+
+<span class="sql-comment">-- =============================================
+-- 4. TABLE DOCUMENTS (Spec 10 : Photos/Docs)
+-- =============================================</span>
+
+<span class="sql-key">CREATE TABLE</span> <span class="sql-name">DOCUMENT_MEDIA</span> (
+    <span class="sql-name">id_doc</span>        <span class="sql-type">SERIAL</span> <span class="sql-key">PRIMARY KEY</span>,
+    <span class="sql-name">titre_doc</span>     <span class="sql-type">VARCHAR(150)</span>,
+    <span class="sql-name">type_doc</span>      <span class="sql-type">VARCHAR(50)</span>, <span class="sql-comment">-- Photo, Plan, PDF</span>
+    <span class="sql-name">url_fichier</span>   <span class="sql-type">VARCHAR(255)</span>,
+    <span class="sql-name">code_batiment</span> <span class="sql-type">INT</span> <span class="sql-key">NOT NULL REFERENCES</span> BATIMENT(code_batiment)
+);
+    </code></pre>
+</div>
+
+<script>
+    function copyCode() {
+        const textToCopy = document.getElementById("sql-code").innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const btn = document.querySelector(".copy-btn");
+            btn.innerText = "✅ Copié !";
+            btn.style.backgroundColor = "#2ecc71";
+            setTimeout(() => { 
+                btn.innerText = "📋 Copier le Code"; 
+                btn.style.backgroundColor = "#e67e22";
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
