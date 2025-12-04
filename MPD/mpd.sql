@@ -1,125 +1,92 @@
-/*==============================================================*/
-/* Nom de SGBD :  PostgreSQL 9.x                                */
-/* Date de cr�ation :  04/12/2025 20:46:48                      */
-/*==============================================================*/
 
+-- =============================================
+-- 1. TABLES DE RÉFÉRENCE (Listes déroulantes)
+-- =============================================
 
+CREATE TABLE ZONE_URBAINE (
+   id_zone      SERIAL PRIMARY KEY,
+   nom_zone     VARCHAR(100) NOT NULL,
+   type_zone    VARCHAR(50)  -- Ex: Quartier, Secteur
+);
 
-
-/*==============================================================*/
-/* Table : BATIMENT                                             */
-/*==============================================================*/
-create table BATIMENT (
-   CODE_BATIMENT        INT4                 not null,
-   ID_ZONE              INT4                 not null,
-   ID_TYPE              INT4                 not null,
-   ID_PROTECTION        INT4                 not null,
-   ID_PROPRIO           INT4                 not null,
-   NOM_BATIMENT         CHAR(50)             null,
-   ADRESSE              CHAR(150)            null,
-   LATITUDE             DECIMAL              null,
-   LONGITUDE            DECIMAL              null,
-   DATE_CONSTRUCTION    DATE                 null,
-   NOTE_HISTORIQUE      TEXT                 null,
-   constraint PK_BATIMENT primary key (CODE_BATIMENT)
+CREATE TABLE TYPE_BATIMENT (
+   id_type      SERIAL PRIMARY KEY,
+   libelle_type VARCHAR(100) NOT NULL -- Ex: Religieux, Civil
 );
 
 
 
-/*==============================================================*/
-/* Table : DOCUMENT___MEDIA                                     */
-/*==============================================================*/
-create table DOCUMENT___MEDIA (
-   ID_DOC               INT4                 not null,
-   CODE_BATIMENT        INT4                 not null,
-   TITRE_DOCUMENT       CHAR(50)             null,
-   TYPE                 CHAR(20)             null,
-   URL_FICHIER          CHAR(200)            null,
-   constraint PK_DOCUMENT___MEDIA primary key (ID_DOC)
+CREATE TABLE NIV_PROTECTION (
+   id_protection SERIAL PRIMARY KEY,
+   niveau        VARCHAR(50) NOT NULL -- Ex: Classé, Inscrit
 );
 
-
-/*==============================================================*/
-/* Table : INSPECTION                                           */
-/*==============================================================*/
-create table INSPECTION (
-   ID_INSPECT           INT4                 not null,
-   CODE_BATIMENT        INT4                 not null,
-   DATE_VISITE          DATE                 null,
-   ETAT                 CHAR(20)             null,
-   constraint PK_INSPECTION primary key (ID_INSPECT)
+CREATE TABLE PROPRIETAIRE (
+   id_proprio   SERIAL PRIMARY KEY,
+   nom_complet  VARCHAR(150) NOT NULL,
+   type_proprio VARCHAR(50), -- Public, Privé
+   contact      VARCHAR(100)
 );
 
-
-/*==============================================================*/
-/* Table : INTERVENTION                                         */
-/*==============================================================*/
-create table INTERVENTION (
-   ID_INTERV            INT4                 not null,
-   CODE_BATIMENT        INT4                 not null,
-   ID_PRESTATAIRE       INT4                 not null,
-   DATE_DEBUT           DATE                 null,
-   TYPE_TRAVAUX         CHAR(20)             null,
-   COUT_ESTIME          MONEY                null,
-   constraint PK_INTERVENTION primary key (ID_INTERV)
+CREATE TABLE PRESTATAIRE (
+   id_prestataire SERIAL PRIMARY KEY,
+   nom_entreprise VARCHAR(150) NOT NULL,
+   role_prest     VARCHAR(100) -- Architecte, Entreprise BTP
 );
 
+-- =============================================
+-- 2. TABLE CENTRALE : BATIMENT
+-- =============================================
 
-
-
-
-/*==============================================================*/
-/* Table : NIV_PROTECTION                                       */
-/*==============================================================*/
-create table NIV_PROTECTION (
-   ID_PROTECTION        INT4                 not null,
-   NIVEAU               CHAR(20)             null,
-   constraint PK_NIV_PROTECTION primary key (ID_PROTECTION)
+CREATE TABLE BATIMENT (
+   code_batiment     SERIAL PRIMARY KEY,
+   nom_batiment      VARCHAR(150),
+   adresse_rue       VARCHAR(255),
+   latitude          DECIMAL(9,6),
+   longitude         DECIMAL(9,6),
+   date_construction DATE,
+   note_historique   TEXT,
+   
+   -- Clés étrangères (Relations 1,1)
+   id_zone       INT REFERENCES ZONE_URBAINE(id_zone),
+   id_type       INT REFERENCES TYPE_BATIMENT(id_type),
+   id_protection INT REFERENCES NIV_PROTECTION(id_protection),
+   id_proprio    INT REFERENCES PROPRIETAIRE(id_proprio)
 );
 
+-- =============================================
+-- 3. TABLES ÉVÉNEMENTS (Historique)
+-- =============================================
 
-
-/*==============================================================*/
-/* Table : PRESTATAIRE                                          */
-/*==============================================================*/
-create table PRESTATAIRE (
-   ID_PRESTATAIRE       INT4                 not null,
-   NOM_ENTREPRISE       CHAR(50)             null,
-   ROLE                 CHAR(50)             null,
-   constraint PK_PRESTATAIRE primary key (ID_PRESTATAIRE)
+CREATE TABLE INSPECTION (
+   id_inspect    SERIAL PRIMARY KEY,
+   date_visite   DATE NOT NULL,
+   rapport       TEXT,
+   etat_constate VARCHAR(50), -- Bon, Moyen, Dégradé...
+   code_batiment INT NOT NULL REFERENCES BATIMENT(code_batiment)
 );
 
-
-
-/*==============================================================*/
-/* Table : PROPRIETAIRE                                         */
-/*==============================================================*/
-create table PROPRIETAIRE (
-   ID_PROPRIO           INT4                 not null,
-   NOM                  CHAR(50)             null,
-   CONTACT              NUMERIC              null,
-   constraint PK_PROPRIETAIRE primary key (ID_PROPRIO)
+CREATE TABLE INTERVENTION (
+   id_interv    SERIAL PRIMARY KEY,
+   date_debut   DATE,
+   date_fin     DATE,
+   type_travaux VARCHAR(255),
+   cout_estime  DECIMAL(12,2),
+   est_validee  BOOLEAN DEFAULT FALSE,
+   
+   code_batiment  INT NOT NULL REFERENCES BATIMENT(code_batiment),
+   id_prestataire INT NOT NULL REFERENCES PRESTATAIRE(id_prestataire)
 );
 
+-- =============================================
+-- 4. TABLE DOCUMENTS (Spec 10 : Photos/Docs)
+-- =============================================
 
-
-/*==============================================================*/
-/* Table : TYPE_BATIMENT                                        */
-/*==============================================================*/
-create table TYPE_BATIMENT (
-   ID_TYPE              INT4                 not null,
-   LIBELLE_TYPE         CHAR(50)             null,
-   constraint PK_TYPE_BATIMENT primary key (ID_TYPE)
+CREATE TABLE DOCUMENT_MEDIA (
+   id_doc        SERIAL PRIMARY KEY,
+   titre_doc     VARCHAR(150),
+   type_doc      VARCHAR(50), -- Photo, Plan, PDF
+   url_fichier   VARCHAR(255),
+   code_batiment INT NOT NULL REFERENCES BATIMENT(code_batiment)
 );
-
-
-
-/*==============================================================*/
-/* Table : ZONE_URBAINE                                         */
-/*==============================================================*/
-create table ZONE_URBAINE (
-   ID_ZONE              INT4                 not null,
-   NOM_ZONE             CHAR(50)             null,
-   constraint PK_ZONE_URBAINE primary key (ID_ZONE)
-);
-
+   
