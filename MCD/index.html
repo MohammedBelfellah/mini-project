@@ -1,374 +1,269 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>MCD Final avec Médias - Cartographie du Patrimoine Urbain</title>
+<head>
+    <meta charset="UTF-8">
+    <title>MCD Complet - Uniforme Bleu</title>
     <style>
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background-color: #f4f7f6;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-      }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
 
-      h1 {
-        color: #2c3e50;
-        text-decoration: underline;
-        margin-bottom: 10px;
-      }
+        /* Conteneur principal */
+        .diagram-container {
+            position: relative;
+            width: 1200px; 
+            height: 1000px;
+            margin: 0 auto;
+        }
 
-      /* Zone de dessin */
-      .mcd-canvas {
-        position: relative;
-        width: 1100px;
-        height: 1200px;
-        background-color: white;
-        border: 1px solid #ccc;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        margin-top: 20px;
-      }
+        /* --- STYLES DES ENTITÉS (Boîtes) --- */
+        .entity {
+            position: absolute;
+            width: 200px;
+            background-color: white;
+            border: 2px solid #C0392B; /* Bordure rouge foncé */
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.15);
+            z-index: 2;
+            border-radius: 4px;
+        }
 
-      /* --- ENTITÉS --- */
-      .entity-box {
-        position: absolute;
-        width: 170px;
-        border: 2px solid #d98880;
-        background-color: white;
-        z-index: 10;
-        box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 4px;
-      }
+        .entity-header {
+            background-color: #E6B0AA; /* COULEUR SAUMON */
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #2C3E50;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            border-bottom: 1px solid #C0392B;
+        }
 
-      .entity-header {
-        background-color: #f2b7b0;
-        padding: 8px;
-        text-align: center;
-        font-weight: bold;
-        border-bottom: 2px solid #d98880;
-        color: #2c3e50;
-        font-size: 14px;
-      }
+        .entity-body {
+            padding: 10px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            color: #333;
+        }
 
-      .entity-body {
-        padding: 10px;
-        font-size: 13px;
-        color: #333;
-        line-height: 1.5;
-      }
+        .pk {
+            text-decoration: underline;
+            font-weight: bold;
+        }
 
-      .pk {
-        text-decoration: underline;
-        font-weight: bold;
-      }
+        /* --- STYLES DES ASSOCIATIONS (Ovales) --- */
+        .association {
+            position: absolute;
+            width: 110px;
+            height: 60px;
+            background-color: #AED6F1; /* COULEUR BLEU CIEL (Pour toutes) */
+            border: 1px solid #3498DB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #154360;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
 
-      /* --- ASSOCIATIONS (OVALES) --- */
-      .relation-oval {
-        position: absolute;
-        width: 120px;
-        height: 60px;
-        background-color: #aed6f1;
-        border: 2px solid #3498db;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        font-weight: bold;
-        font-size: 12px;
-        z-index: 10;
-        color: #154360;
-        box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-      }
+        /* --- SVG POUR LES LIGNES --- */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
 
-      /* --- DESSIN (SVG) --- */
-      svg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-        pointer-events: none;
-      }
+        line {
+            stroke: #2C3E50;
+            stroke-width: 1.5;
+        }
 
-      .link-line {
-        stroke: #333;
-        stroke-width: 2;
-      }
+        /* --- CARDINALITÉS --- */
+        .card {
+            position: absolute;
+            background-color: rgba(255,255,255,0.9);
+            padding: 0 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #000;
+            z-index: 3;
+            border-radius: 3px;
+        }
 
-      .card-text {
-        font-size: 14px;
-        font-weight: 800;
-        fill: #000;
-        font-family: Arial, sans-serif;
-        stroke: white;
-        stroke-width: 4px;
-        paint-order: stroke;
-      }
+        /* --- POSITIONNEMENT --- */
 
-      /* --- POSITIONS --- */
+        /* Ligne Supérieure */
+        #zone     { top: 20px; left: 20px; }
+        #type     { top: 20px; left: 320px; }
+        #niv      { top: 20px; left: 620px; }
+        #proprio  { top: 20px; left: 920px; }
 
-      /* Ligne 1 : Référentiels */
-      #zone {
-        top: 40px;
-        left: 40px;
-      }
-      #type {
-        top: 40px;
-        left: 320px;
-      }
-      #protection {
-        top: 40px;
-        left: 600px;
-      }
-      #proprio {
-        top: 40px;
-        left: 880px;
-      }
+        /* Associations Haut */
+        #situer     { top: 160px; left: 65px; }
+        #avoir      { top: 160px; left: 365px; }
+        #etre       { top: 160px; left: 665px; }
+        #appartenir { top: 160px; left: 965px; }
 
-      /* Ligne 2 : Associations Haut */
-      #rel-situer {
-        top: 200px;
-        left: 65px;
-      }
-      #rel-typer {
-        top: 200px;
-        left: 345px;
-      }
-      #rel-classer {
-        top: 200px;
-        left: 625px;
-      }
-      #rel-appartenir {
-        top: 200px;
-        left: 905px;
-      }
+        /* CENTRE */
+        #batiment { 
+            top: 320px; 
+            left: 480px; 
+            width: 240px; 
+        }
 
-      /* Ligne 3 : BÂTIMENT (CENTRE) */
-      #batiment {
-        top: 380px;
-        left: 465px;
-        width: 190px;
-      }
+        /* Associations Bas - Niveau 1 */
+        #faire     { top: 520px; left: 150px; }
+        #illustrer { top: 520px; left: 545px; }
+        #subir     { top: 520px; left: 900px; }
 
-      /* Ligne 4 : Associations Bas */
-      #rel-inspecter {
-        top: 550px;
-        left: 200px;
-      }
-      #rel-illustrer {
-        top: 550px;
-        left: 490px;
-      } /* Milieu */
-      #rel-subir {
-        top: 550px;
-        left: 750px;
-      }
+        /* Entités Bas - Niveau 1 */
+        #inspection { top: 650px; left: 100px; }
+        #document   { top: 650px; left: 500px; }
+        #intervention { top: 650px; left: 855px; }
 
-      /* Ligne 5 : Inspection / Documents / Intervention */
-      #inspection {
-        top: 700px;
-        left: 150px;
-      }
-      #document {
-        top: 700px;
-        left: 465px;
-        background-color: #fdfefe;
-      }
-      #intervention {
-        top: 700px;
-        left: 725px;
-      }
+        /* Association Bas - Niveau 2 */
+        #realiser { top: 820px; left: 900px; }
 
-      /* Ligne 6 : Association Prestataire */
-      #rel-realiser {
-        top: 880px;
-        left: 750px;
-      }
+        /* Entité Bas - Niveau 2 */
+        #prestataire { top: 920px; left: 855px; }
 
-      /* Ligne 7 : Prestataire */
-      #prestataire {
-        top: 1000px;
-        left: 725px;
-      }
     </style>
-  </head>
-  <body>
-    <h1>MCD : Cartographie du Patrimoine Urbain</h1>
+</head>
+<body>
 
-    <div class="mcd-canvas">
-      <div id="batiment" class="entity-box">
-        <div class="entity-header">BÂTIMENT</div>
-        <div class="entity-body">
-          <span class="pk">Code_Batiment</span><br />
-          Nom_Batiment<br />
-          Adresse<br />
-          Latitude, Longitude<br />
-          Date_Construction<br />
-          Note_Historique
-        </div>
-      </div>
+<div class="diagram-container">
 
-      <div id="zone" class="entity-box">
+    <svg>
+        <line x1="120" y1="120" x2="120" y2="160" /> <line x1="120" y1="220" x2="480" y2="350" /> <line x1="420" y1="120" x2="420" y2="160" /> <line x1="420" y1="220" x2="520" y2="320" /> <line x1="720" y1="120" x2="720" y2="160" /> <line x1="720" y1="220" x2="680" y2="320" /> <line x1="1020" y1="120" x2="1020" y2="160" /> <line x1="1020" y1="220" x2="720" y2="350" /> <line x1="480" y1="420" x2="205" y2="520" /> <line x1="205" y1="580" x2="205" y2="650" /> <line x1="600" y1="480" x2="600" y2="520" /> <line x1="600" y1="580" x2="600" y2="650" /> <line x1="720" y1="420" x2="955" y2="520" /> <line x1="955" y1="580" x2="955" y2="650" /> <line x1="955" y1="780" x2="955" y2="820" /> <line x1="955" y1="880" x2="955" y2="920" /> </svg>
+
+    <div class="card" style="top: 130px; left: 130px;">0,n</div>
+    <div class="card" style="top: 320px; left: 280px;">1,1</div>
+
+    <div class="card" style="top: 130px; left: 430px;">0,n</div>
+    <div class="card" style="top: 290px; left: 450px;">1,1</div>
+
+    <div class="card" style="top: 130px; left: 730px;">0,n</div>
+    <div class="card" style="top: 290px; left: 700px;">1,1</div>
+
+    <div class="card" style="top: 130px; left: 1030px;">1,n</div>
+    <div class="card" style="top: 300px; left: 850px;">1,1</div>
+
+    <div class="card" style="top: 480px; left: 280px;">0,n</div>
+    <div class="card" style="top: 620px; left: 215px;">1,1</div>
+
+    <div class="card" style="top: 490px; left: 610px;">0,n</div>
+    <div class="card" style="top: 620px; left: 610px;">1,1</div>
+
+    <div class="card" style="top: 480px; left: 880px;">0,n</div>
+    <div class="card" style="top: 620px; left: 965px;">1,1</div>
+
+    <div class="card" style="top: 790px; left: 965px;">0,n</div>
+    <div class="card" style="top: 900px; left: 965px;">0,n</div>
+
+    <div id="zone" class="entity">
         <div class="entity-header">ZONE_URBAINE</div>
         <div class="entity-body">
-          <span class="pk">ID_Zone</span><br />
-          Nom_Zone<br />
-          Type_Zone
+            <span class="pk">ID Zone</span> (Entier)<br>
+            Nom_Zone (Caractère)
         </div>
-      </div>
-      <div id="type" class="entity-box">
+    </div>
+
+    <div id="type" class="entity">
         <div class="entity-header">TYPE_BÂTIMENT</div>
         <div class="entity-body">
-          <span class="pk">ID_Type</span><br />
-          Libelle_Type
+            <span class="pk">ID Type</span> (Entier)<br>
+            Libelle_Type (Caractère)
         </div>
-      </div>
-      <div id="protection" class="entity-box">
+    </div>
+
+    <div id="niv" class="entity">
         <div class="entity-header">NIV_PROTECTION</div>
         <div class="entity-body">
-          <span class="pk">ID_Protection</span><br />
-          Niveau
+            <span class="pk">ID Protection</span> (Entier)<br>
+            Niveau (Caractère)
         </div>
-      </div>
-      <div id="proprio" class="entity-box">
+    </div>
+
+    <div id="proprio" class="entity">
         <div class="entity-header">PROPRIÉTAIRE</div>
         <div class="entity-body">
-          <span class="pk">ID_Proprio</span><br />
-          Nom_Complet<br />
-          Contact
+            <span class="pk">ID Proprio</span> (Entier)<br>
+            Nom (Caractère)<br>
+            Contact (Numérique)
         </div>
-      </div>
+    </div>
 
-      <div id="inspection" class="entity-box">
+    <div id="batiment" class="entity">
+        <div class="entity-header">BÂTIMENT</div>
+        <div class="entity-body">
+            <span class="pk">CODE_BATIMENT</span> (Entier)<br>
+            Nom_Batiment (Caractère)<br>
+            Adresse (Caractère)<br>
+            Latitude (Décimal)<br>
+            Longitude (Décimal)<br>
+            Date_Construction (Date)<br>
+            Note_Historique (Texte)
+        </div>
+    </div>
+
+    <div id="inspection" class="entity">
         <div class="entity-header">INSPECTION</div>
         <div class="entity-body">
-          <span class="pk">ID_Inspect</span><br />
-          Date_Visite<br />
-          Etat (Bon/Mauvais)
+            <span class="pk">ID Inspect</span> (Entier)<br>
+            Date_Visite (Date)<br>
+            Etat (Caractère)
         </div>
-      </div>
+    </div>
 
-      <div id="document" class="entity-box" style="border-color: #8e44ad">
-        <div
-          class="entity-header"
-          style="background-color: #d2b4de; border-color: #8e44ad"
-        >
-          DOCUMENT / MEDIA
-        </div>
+    <div id="document" class="entity">
+        <div class="entity-header">DOCUMENT / MEDIA</div>
         <div class="entity-body">
-          <span class="pk">ID_Doc</span><br />
-          Titre_Document<br />
-          Type (Photo, Plan)<br />
-          URL_Fichier
+            <span class="pk">ID Doc</span> (Entier)<br>
+            Titre_Doc (Caractère)<br>
+            Type (Caractère)<br>
+            URL_Fichier (Caractère)
         </div>
-      </div>
+    </div>
 
-      <div id="intervention" class="entity-box">
+    <div id="intervention" class="entity">
         <div class="entity-header">INTERVENTION</div>
         <div class="entity-body">
-          <span class="pk">ID_Interv</span><br />
-          Date_Debut<br />
-          Type_Travaux<br />
-          Cout_Estime
+            <span class="pk">ID Interv</span> (Entier)<br>
+            Date_Debut (Date)<br>
+            Type_Travaux (Caractère)<br>
+            Cout_Estime (Monnaie)
         </div>
-      </div>
+    </div>
 
-      <div id="prestataire" class="entity-box">
+    <div id="prestataire" class="entity">
         <div class="entity-header">PRESTATAIRE</div>
         <div class="entity-body">
-          <span class="pk">ID_Prestataire</span><br />
-          Nom_Entreprise<br />
-          Role
+            <span class="pk">ID Prestataire</span> (Entier)<br>
+            Nom_Entreprise (Caractère)<br>
+            Role (Caractère)
         </div>
-      </div>
-
-      <div id="rel-situer" class="relation-oval">Se Situer</div>
-      <div id="rel-typer" class="relation-oval">Avoir Type</div>
-      <div id="rel-classer" class="relation-oval">Être Protégé</div>
-      <div id="rel-appartenir" class="relation-oval">Appartenir</div>
-
-      <div id="rel-inspecter" class="relation-oval">Faire l'objet</div>
-
-      <div
-        id="rel-illustrer"
-        class="relation-oval"
-        style="border-color: #8e44ad; background-color: #e8daef; color: #5b2c6f"
-      >
-        Illustrer
-      </div>
-
-      <div id="rel-subir" class="relation-oval">Subir Tx</div>
-      <div id="rel-realiser" class="relation-oval">Réaliser</div>
-
-      <svg>
-        <line x1="125" y1="140" x2="125" y2="200" class="link-line" />
-        <text x="130" y="180" class="card-text">0,n</text>
-        <line x1="125" y1="260" x2="480" y2="380" class="link-line" />
-        <text x="440" y="360" class="card-text">1,1</text>
-
-        <line x1="405" y1="140" x2="405" y2="200" class="link-line" />
-        <text x="410" y="180" class="card-text">0,n</text>
-        <line x1="405" y1="260" x2="520" y2="380" class="link-line" />
-        <text x="480" y="340" class="card-text">1,1</text>
-
-        <line x1="685" y1="140" x2="685" y2="200" class="link-line" />
-        <text x="690" y="180" class="card-text">0,n</text>
-        <line x1="685" y1="260" x2="580" y2="380" class="link-line" />
-        <text x="600" y="340" class="card-text">1,1</text>
-
-        <line x1="965" y1="140" x2="965" y2="200" class="link-line" />
-        <text x="970" y="180" class="card-text">1,n</text>
-        <line x1="965" y1="260" x2="640" y2="380" class="link-line" />
-        <text x="660" y="360" class="card-text">1,1</text>
-
-        <line x1="465" y1="450" x2="260" y2="550" class="link-line" />
-        <text x="350" y="490" class="card-text">0,n</text>
-        <line x1="260" y1="610" x2="235" y2="700" class="link-line" />
-        <text x="250" y="680" class="card-text">1,1</text>
-
-        <line x1="560" y1="450" x2="550" y2="550" class="link-line" />
-        <text
-          x="560"
-          y="485"
-          class="card-text"
-          style="
-            fill: #5b2c6f;
-            paint-order: stroke;
-            stroke: white;
-            stroke-width: 3px;
-          "
-        >
-          0,n
-        </text>
-
-        <line x1="550" y1="610" x2="550" y2="700" class="link-line" />
-        <text
-          x="555"
-          y="680"
-          class="card-text"
-          style="
-            fill: #5b2c6f;
-            paint-order: stroke;
-            stroke: white;
-            stroke-width: 3px;
-          "
-        >
-          1,1
-        </text>
-
-        <line x1="655" y1="450" x2="810" y2="550" class="link-line" />
-        <text x="730" y="490" class="card-text">0,n</text>
-        <line x1="810" y1="610" x2="810" y2="700" class="link-line" />
-        <text x="815" y="680" class="card-text">1,1</text>
-
-        <line x1="810" y1="840" x2="810" y2="880" class="link-line" />
-        <text x="815" y="870" class="card-text">1,1</text>
-        <line x1="810" y1="940" x2="810" y2="1000" class="link-line" />
-        <text x="815" y="980" class="card-text">0,n</text>
-      </svg>
     </div>
-  </body>
+
+    <div id="situer" class="association">Se Situer</div>
+    <div id="avoir" class="association">Avoir Type</div>
+    <div id="etre" class="association">Être Protégé</div>
+    <div id="appartenir" class="association">Appartenir</div>
+    
+    <div id="faire" class="association">Faire l'objet</div>
+    <div id="illustrer" class="association">Illustrer</div> <div id="subir" class="association">Subir Tx</div>
+    <div id="realiser" class="association">Réaliser</div>
+
+</div>
+
+</body>
 </html>
