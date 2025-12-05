@@ -1,337 +1,113 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <title>MCT Complet - Cartographie Patrimoine</title>
-    <style>
-      /* --- STYLE GÉNÉRAL --- */
-      body {
-        font-family: "Segoe UI", Arial, sans-serif;
-        background-color: #eef2f5;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
+<head>
+    <meta charset="UTF-8">
+    <title>MCT Final - Triangle ET</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px; text-align: center;">
 
-      h1 {
-        color: #2c3e50;
-        text-decoration: underline;
-        margin-bottom: 40px;
-      }
-      h3 {
-        color: #e67e22;
-        margin-bottom: 10px;
-        margin-top: 0;
-      }
+    <div style="display: inline-block; border: 1px solid #ccc; padding: 40px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px;">
 
-      /* Conteneur pour chaque MCT */
-      .mct-section {
-        background-color: white;
-        padding: 30px;
-        margin-bottom: 50px; /* Espace entre les diagrammes */
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 700px;
-        position: relative;
-      }
+        <h2 style="color: #2c3e50; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Modèle Conceptuel des Traitements</h2>
+        <p style="font-style: italic; color: #666; margin-bottom: 40px;">Cycle de vie du Patrimoine Urbain</p>
 
-      /* Indicateur de flux entre les processus */
-      .flow-arrow {
-        font-size: 50px;
-        color: #bdc3c7;
-        margin: -40px 0 10px 0;
-      }
+        <svg width="650" height="900" viewBox="0 0 650 900">
+            
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#000" />
+                </marker>
+            </defs>
 
-      /* --- FORMES MERISE --- */
-      .event-circle {
-        width: 110px;
-        height: 110px;
-        border: 2px solid #2c3e50;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        font-weight: bold;
-        font-size: 13px;
-        background: white;
-        z-index: 2;
-        padding: 5px;
-      }
+            <ellipse cx="325" cy="40" rx="90" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="325" y="45" text-anchor="middle" font-size="12">Nouvelle Découverte</text>
+            
+            <line x1="325" y1="65" x2="325" y2="100" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-      .operation-table {
-        border-collapse: collapse;
-        width: 550px;
-        border: 3px solid #2c3e50;
-        margin: 10px 0;
-        background: white;
-        z-index: 2;
-      }
+            <rect x="175" y="100" width="300" height="60" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <line x1="175" y1="130" x2="475" y2="130" stroke="#000" stroke-width="1.5"/>
+            
+            <text x="325" y="120" text-anchor="middle" font-weight="bold" font-size="12">ATTRIBUTION CODE UNIQUE</text>
+            <text x="235" y="150" text-anchor="middle" font-size="11">Dossier Complet</text>
+            <text x="415" y="150" text-anchor="middle" font-size="11">Incomplet / Rejet</text>
+            
+            <line x1="325" y1="130" x2="325" y2="160" stroke="#000" stroke-width="1.5"/>
 
-      .operation-table td {
-        border: 2px solid #2c3e50;
-        padding: 8px;
-      }
+            <line x1="235" y1="160" x2="235" y2="220" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/> 
+            <line x1="415" y1="160" x2="475" y2="220" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-      .op-header {
-        text-align: center;
-        font-weight: bold;
-        background-color: #ecf0f1;
-        font-size: 14px;
-      }
+            <ellipse cx="475" cy="245" rx="70" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="475" y="250" text-anchor="middle" font-size="11">Dossier Archivé</text>
 
-      .op-body {
-        text-align: left;
-        vertical-align: top;
-        height: 70px;
-        font-size: 13px;
-      }
 
-      .op-rules {
-        text-align: center;
-        font-weight: bold;
-        background-color: #ecf0f1;
-        width: 50%;
-        font-size: 13px;
-      }
+            <ellipse cx="235" cy="245" rx="90" ry="25" fill="#e3f2fd" stroke="#000" stroke-width="2"/>
+            <text x="235" y="245" text-anchor="middle" font-weight="bold" font-size="11">Bâtiment Identifié</text>
+            <text x="235" y="260" text-anchor="middle" font-size="10" fill="#555">(Code Unique)</text>
 
-      /* --- CONNECTEURS --- */
-      .row-events {
-        display: flex;
-        justify-content: space-around;
-        width: 100%;
-        position: relative;
-        padding-bottom: 10px;
-      }
+            <ellipse cx="475" cy="310" rx="80" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="475" y="315" text-anchor="middle" font-size="11">Visite Planifiée</text>
 
-      /* Synchronisation (Barre et triangle) */
-      .sync-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        height: 40px;
-        position: relative;
-        margin-top: -10px;
-        margin-bottom: 5px;
-      }
+            <line x1="235" y1="270" x2="305" y2="350" stroke="#000" stroke-width="1.5"/> 
+            <line x1="475" y1="335" x2="345" y2="350" stroke="#000" stroke-width="1.5"/> 
+            
+            <polygon points="305,350 345,350 325,375" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="325" y="362" text-anchor="middle" font-size="10" font-weight="bold">ET</text>
 
-      .sync-line-horiz {
-        width: 60%;
-        border-bottom: 3px solid #2c3e50;
-        position: absolute;
-        top: 0;
-      }
+            <line x1="325" y1="375" x2="325" y2="400" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-      .sync-triangle {
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 15px solid #2c3e50;
-        margin-top: 0; /* Colle à la barre */
-        position: relative;
-        z-index: 1;
-      }
 
-      .sync-label {
-        position: absolute;
-        top: -20px;
-        background: white;
-        padding: 0 5px;
-        font-weight: bold;
-        color: #2c3e50;
-      }
+            <rect x="175" y="400" width="300" height="60" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <line x1="175" y1="430" x2="475" y2="430" stroke="#000" stroke-width="1.5"/>
+            
+            <text x="325" y="420" text-anchor="middle" font-weight="bold" font-size="12">ÉVALUATION ÉTAT</text>
+            <text x="235" y="450" text-anchor="middle" font-size="11">Bon / Moyen</text>
+            <text x="415" y="450" text-anchor="middle" font-size="11">Dégradé / Ruine</text>
+            
+            <line x1="325" y1="430" x2="325" y2="460" stroke="#000" stroke-width="1.5"/>
 
-      .arrow-down-simple {
-        font-size: 30px;
-        color: #2c3e50;
-        margin-top: -10px;
-        z-index: 0;
-      }
+            <line x1="235" y1="460" x2="175" y2="510" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="415" y1="460" x2="325" y2="540" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-      /* Lignes de sortie diagonales */
-      .output-lines {
-        position: relative;
-        width: 100%;
-        height: 40px;
-        margin-top: -5px;
-      }
+            <ellipse cx="175" cy="535" rx="70" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="175" y="540" text-anchor="middle" font-size="11">Rapport RAS</text>
 
-      .line-left {
-        position: absolute;
-        left: 25%;
-        height: 40px;
-        width: 2px;
-        background: #2c3e50;
-        transform: skewX(20deg);
-      }
-      .line-right {
-        position: absolute;
-        right: 25%;
-        height: 40px;
-        width: 2px;
-        background: #2c3e50;
-        transform: skewX(-20deg);
-      }
-    </style>
-  </head>
-  <body>
-    <h1>MCT : PROJET CARTOGRAPHIE PATRIMOINE URBAIN</h1>
 
-    <div class="mct-section">
-      <h3>1. Processus d'Inventaire et Classement</h3>
+            <ellipse cx="325" cy="565" rx="90" ry="25" fill="#ffebee" stroke="#000" stroke-width="2"/>
+            <text x="325" y="565" text-anchor="middle" font-weight="bold" font-size="11">Nécessité Intervention</text>
+            <text x="325" y="580" text-anchor="middle" font-size="10" fill="#555">(État Dégradé)</text>
 
-      <div class="row-events">
-        <div class="event-circle">Découverte<br />nouveau site</div>
-        <div class="event-circle">
-          Demande<br />d'inscription<br />(Citoyen/Assoc)
-        </div>
-      </div>
+            <ellipse cx="525" cy="565" rx="80" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="525" y="570" text-anchor="middle" font-size="11">Rapport Technique</text>
 
-      <div class="sync-container">
-        <div class="sync-line-horiz"></div>
-        <div class="sync-label">OU</div>
-        <div class="sync-triangle"></div>
-        <div class="arrow-down-simple">↓</div>
-      </div>
+            <line x1="325" y1="590" x2="395" y2="630" stroke="#000" stroke-width="1.5"/> 
+            <line x1="525" y1="590" x2="435" y2="630" stroke="#000" stroke-width="1.5"/> 
 
-      <table class="operation-table">
-        <tr>
-          <td class="op-header" style="width: 15%">OP 01</td>
-          <td class="op-header">INSTRUCTION DE LA DEMANDE (Spec 1, 2, 3)</td>
-        </tr>
-        <tr>
-          <td colspan="2" class="op-body">
-            - Vérification de la valeur historique et culturelle.<br />
-            - Relevé coordonnées GPS (Lat/Long) et adresse.<br />
-            - Identification propriétaire et type (Religieux, Civil...).
-          </td>
-        </tr>
-        <tr>
-          <td class="op-rules">R1 : Dossier Validé</td>
-          <td class="op-rules">R2 : Rejet / Hors sujet</td>
-        </tr>
-      </table>
+            <polygon points="395,630 435,630 415,655" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="415" y="642" text-anchor="middle" font-size="10" font-weight="bold">ET</text>
 
-      <div class="output-lines">
-        <div class="line-left"></div>
-        <div class="line-right"></div>
-      </div>
+            <line x1="415" y1="655" x2="415" y2="680" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-      <div class="row-events">
-        <div class="event-circle" style="border-color: green; color: green">
-          Bâtiment<br />Classé et<br />Inventorié
-        </div>
-        <div class="event-circle" style="border-color: red; color: red">
-          Demande<br />Rejetée
-        </div>
-      </div>
+
+            <rect x="265" y="680" width="300" height="60" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <line x1="265" y1="710" x2="565" y2="710" stroke="#000" stroke-width="1.5"/>
+            
+            <text x="415" y="700" text-anchor="middle" font-weight="bold" font-size="12">SUPERVISION MUNICIPALE</text>
+            <text x="325" y="730" text-anchor="middle" font-size="11">Travaux Validés</text>
+            <text x="505" y="730" text-anchor="middle" font-size="11">Non Conforme</text>
+            
+            <line x1="415" y1="710" x2="415" y2="740" stroke="#000" stroke-width="1.5"/>
+
+            <line x1="325" y1="740" x2="295" y2="790" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="505" y1="740" x2="535" y2="790" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <ellipse cx="295" cy="815" rx="80" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="295" y="820" text-anchor="middle" font-size="11">Fin Chantier</text>
+
+            <ellipse cx="535" cy="815" rx="80" ry="25" fill="#fff" stroke="#000" stroke-width="1.5"/>
+            <text x="535" y="820" text-anchor="middle" font-size="11">Nouvelle Intervention</text>
+
+        </svg>
     </div>
 
-    <div class="flow-arrow">⬇</div>
-
-    <div class="mct-section">
-      <h3>2. Processus de Surveillance (Spec 5, 9)</h3>
-
-      <div class="row-events">
-        <div class="event-circle">Date de visite<br />périodique</div>
-        <div class="event-circle">Signalement<br />d'une dégradation</div>
-      </div>
-
-      <div class="sync-container">
-        <div class="sync-line-horiz"></div>
-        <div class="sync-label">OU</div>
-        <div class="sync-triangle"></div>
-        <div class="arrow-down-simple">↓</div>
-      </div>
-
-      <table class="operation-table">
-        <tr>
-          <td class="op-header" style="width: 15%">OP 02</td>
-          <td class="op-header">INSPECTION DE L'ÉTAT</td>
-        </tr>
-        <tr>
-          <td colspan="2" class="op-body">
-            - Visite technique sur le terrain.<br />
-            - Prise de photos (Spec 10).<br />
-            - Qualification état : Bon, Moyen, Dégradé ou Ruine.
-          </td>
-        </tr>
-        <tr>
-          <td class="op-rules">R1 : État Correct</td>
-          <td class="op-rules">R2 : État Critique</td>
-        </tr>
-      </table>
-
-      <div class="output-lines">
-        <div class="line-left"></div>
-        <div class="line-right"></div>
-      </div>
-
-      <div class="row-events">
-        <div class="event-circle">Mise à jour<br />Fiche technique</div>
-        <div class="event-circle" style="background-color: #ffe6e6">
-          <b>Alerte<br />Restauration</b>
-        </div>
-      </div>
-    </div>
-
-    <div class="flow-arrow">⬇</div>
-
-    <div class="mct-section">
-      <h3>3. Processus de Restauration (Spec 6, 7, 8)</h3>
-
-      <div class="row-events">
-        <div class="event-circle" style="background-color: #ffe6e6">
-          Alerte<br />Restauration
-        </div>
-        <div class="event-circle">Budget<br />Alloué</div>
-      </div>
-
-      <div class="sync-container">
-        <div class="sync-line-horiz"></div>
-        <div class="sync-label">ET</div>
-        <div class="sync-triangle"></div>
-        <div class="arrow-down-simple">↓</div>
-      </div>
-
-      <table class="operation-table">
-        <tr>
-          <td class="op-header" style="width: 15%">OP 03</td>
-          <td class="op-header">RÉALISATION DES TRAVAUX</td>
-        </tr>
-        <tr>
-          <td colspan="2" class="op-body">
-            - Choix prestataire (Spec 7).<br />
-            - Exécution des travaux.<br />
-            - Validation du rapport technique par la municipalité (Spec 8).
-          </td>
-        </tr>
-        <tr>
-          <td class="op-rules">R1 : Travaux Validés</td>
-          <td class="op-rules">R2 : Non Conforme</td>
-        </tr>
-      </table>
-
-      <div class="output-lines">
-        <div class="line-left"></div>
-        <div class="line-right"></div>
-      </div>
-
-      <div class="row-events">
-        <div class="event-circle" style="border-color: green">
-          Bâtiment<br />Restauré<br />(Retour État "Bon")
-        </div>
-        <div class="event-circle" style="border-color: orange">
-          Contentieux<br />Prestataire
-        </div>
-      </div>
-    </div>
-    <div>B.luise</div>
-  </body>
+</body>
 </html>
