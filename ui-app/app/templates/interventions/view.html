@@ -4,6 +4,12 @@
   <h1><i class="bi bi-tools"></i> Détails de l'Intervention</h1>
   <div>
     <a
+      href="{{ url_for('interventions.edit_intervention', id=intervention[0]) }}"
+      class="btn btn-warning"
+    >
+      <i class="bi bi-pencil"></i> Modifier
+    </a>
+    <a
       href="{{ url_for('buildings.view_building', id=intervention[7]) }}"
       class="btn btn-primary"
     >

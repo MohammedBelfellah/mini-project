@@ -5,41 +5,26 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="bi bi-clipboard-check"></i> Liste des Inspections</h1>
-    <a href="{{ url_for('inspections.add_inspection') }}" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Ajouter une Inspection
+    <a href="{{ url_for('inspections.add_inspection') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nouvelle Inspection
     </a>
 </div>
 
 <!-- Search and Filter Card -->
 <div class="card mb-4">
-    <div class="card-header bg-success text-white">
+    <div class="card-header bg-primary text-white">
         <h5 class="mb-0"><i class="bi bi-search"></i> Recherche et Filtres</h5>
     </div>
     <div class="card-body">
         <form method="GET" action="{{ url_for('inspections.list_inspections') }}" id="filterForm">
             <div class="row g-3">
-                <!-- Search Box -->
-                <div class="col-md-6 col-lg-3">
+                <div class="col-md-3">
                     <label for="search" class="form-label"><i class="bi bi-search"></i> Recherche</label>
                     <input type="text" class="form-control" id="search" name="search" 
-                           placeholder="Bâtiment, rapport..." value="{{ current_search }}">
+                           placeholder="Bâtiment..." value="{{ current_search }}">
                 </div>
                 
-                <!-- Building Filter -->
-                <div class="col-md-6 col-lg-3">
-                    <label for="building" class="form-label"><i class="bi bi-building"></i> Bâtiment</label>
-                    <select class="form-select" id="building" name="building">
-                        <option value="">Tous les bâtiments</option>
-                        {% for b in buildings %}
-                        <option value="{{ b[0] }}" {% if current_building|string == b[0]|string %}selected{% endif %}>
-                            {{ b[1] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <!-- État Filter -->
-                <div class="col-md-6 col-lg-2">
+                <div class="col-md-3">
                     <label for="etat" class="form-label"><i class="bi bi-heart-pulse"></i> État</label>
                     <select class="form-select" id="etat" name="etat">
                         <option value="">Tous les états</option>
@@ -51,28 +36,24 @@
                     </select>
                 </div>
                 
-                <!-- Date From -->
-                <div class="col-md-6 col-lg-2">
-                    <label for="date_from" class="form-label"><i class="bi bi-calendar"></i> Du</label>
-                    <input type="date" class="form-control" id="date_from" name="date_from" 
-                           value="{{ current_date_from }}">
+                <div class="col-md-3">
+                    <label for="building" class="form-label"><i class="bi bi-building"></i> Bâtiment</label>
+                    <select class="form-select" id="building" name="building">
+                        <option value="">Tous les bâtiments</option>
+                        {% for b in buildings %}
+                        <option value="{{ b[0] }}" {% if current_building|string == b[0]|string %}selected{% endif %}>
+                            {{ b[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
-                <!-- Date To -->
-                <div class="col-md-6 col-lg-2">
-                    <label for="date_to" class="form-label"><i class="bi bi-calendar"></i> Au</label>
-                    <input type="date" class="form-control" id="date_to" name="date_to" 
-                           value="{{ current_date_to }}">
-                </div>
-            </div>
-            
-            <div class="row mt-3">
-                <div class="col-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-funnel"></i> Appliquer
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-funnel"></i> Filtrer
                     </button>
                     <a href="{{ url_for('inspections.list_inspections') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle"></i> Réinitialiser
+                        <i class="bi bi-x-circle"></i>
                     </a>
                 </div>
             </div>
@@ -94,7 +75,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
-                        <th>Date de Visite</th>
+                        <th>Date</th>
                         <th>Bâtiment</th>
                         <th>État Constaté</th>
                         <th>Rapport</th>
@@ -106,14 +87,10 @@
                         {% for i in inspections %}
                         <tr>
                             <td><strong>{{ i[0] }}</strong></td>
-                            <td>
-                                {% if i[1] %}
-                                    {% if i[1] is string %}{{ i[1] }}{% else %}{{ i[1].strftime('%d/%m/%Y') }}{% endif %}
-                                {% else %}N/A{% endif %}
-                            </td>
+                            <td>{{ i[1].strftime('%d/%m/%Y') if i[1] else 'N/A' }}</td>
                             <td>
                                 <a href="{{ url_for('buildings.view_building', id=i[4]) }}">
-                                    {{ i[5] }}
+                                    <i class="bi bi-building"></i> {{ i[5] }}
                                 </a>
                             </td>
                             <td>
@@ -122,20 +99,37 @@
                                 {% elif i[2] == 'Moyen' %}
                                 <span class="badge bg-warning text-dark">{{ i[2] }}</span>
                                 {% elif i[2] == 'Dégradé' %}
-                                <span class="badge bg-orange" style="background-color: #e67e22;">{{ i[2] }}</span>
+                                <span class="badge" style="background-color: #e67e22;">{{ i[2] }}</span>
                                 {% elif i[2] == 'En ruine' %}
                                 <span class="badge bg-danger">{{ i[2] }}</span>
                                 {% else %}
                                 <span class="badge bg-secondary">{{ i[2] or 'N/A' }}</span>
                                 {% endif %}
                             </td>
-                            <td>{{ (i[3][:50] + '...') if i[3] and i[3]|length > 50 else (i[3] or '-') }}</td>
+                            <td>
+                                {% if i[3] %}
+                                <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ i[3] }}">
+                                    {{ i[3][:50] }}{% if i[3]|length > 50 %}...{% endif %}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a href="{{ url_for('inspections.view_inspection', id=i[0]) }}" 
                                        class="btn btn-outline-primary" title="Voir">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    <a href="{{ url_for('inspections.edit_inspection', id=i[0]) }}" 
+                                       class="btn btn-outline-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            title="Supprimer"
+                                            onclick="confirmDelete({{ i[0] }}, '{{ i[5]|e }}', '{{ i[1].strftime('%d/%m/%Y') if i[1] else 'N/A' }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -153,10 +147,44 @@
         </div>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'inspection du <strong id="inspDate"></strong> pour le bâtiment <strong id="inspBuilding"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Cette action est irréversible.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    function confirmDelete(id, building, date) {
+        document.getElementById('inspBuilding').textContent = building;
+        document.getElementById('inspDate').textContent = date;
+        document.getElementById('deleteForm').action = `/inspections/delete/${id}`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    // Auto-submit on filter change
     document.querySelectorAll('#filterForm select').forEach(select => {
         select.addEventListener('change', () => document.getElementById('filterForm').submit());
     });

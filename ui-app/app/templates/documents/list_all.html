@@ -106,7 +106,9 @@
                     </a>
                     <button type="button" class="btn btn-outline-danger" 
                             title="Supprimer"
-                            onclick="confirmDelete({{ doc[0] }}, '{{ doc[1]|e }}')">
+                            data-doc-id="{{ doc[0] }}"
+                            data-doc-name="{{ doc[1] }}"
+                            onclick="confirmDelete(this.dataset.docId, this.dataset.docName)">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>

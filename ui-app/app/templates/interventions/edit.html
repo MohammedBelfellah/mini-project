@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier l'Intervention{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-pencil"></i> Modifier l'Intervention</h1>
+    <a href="{{ url_for('interventions.view_intervention', id=intervention[0]) }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-building"></i> Bâtiment: <strong>{{ intervention[9] }}</strong>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('interventions.edit_intervention', id=intervention[0]) }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_prestataire" class="form-label">Prestataire <span class="text-danger">*</span></label>
+                    <select class="form-select" id="id_prestataire" name="id_prestataire" required>
+                        {% for p in prestataires %}
+                        <option value="{{ p[0] }}" {% if intervention[8] == p[0] %}selected{% endif %}>
+                            {{ p[1] }} ({{ p[2] or 'N/A' }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="statut_travaux" class="form-label">Statut des Travaux</label>
+                    <select class="form-select" id="statut_travaux" name="statut_travaux">
+                        {% for statut in statuts %}
+                        <option value="{{ statut }}" {% if intervention[6] == statut %}selected{% endif %}>{{ statut }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="date_debut" class="form-label">Date de Début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" 
+                           value="{{ intervention[1].strftime('%Y-%m-%d') if intervention[1] else '' }}">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="date_fin" class="form-label">Date de Fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin"
+                           value="{{ intervention[2].strftime('%Y-%m-%d') if intervention[2] else '' }}">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cout_estime" class="form-label">Coût Estimé (MAD)</label>
+                    <input type="number" step="0.01" class="form-control" id="cout_estime" name="cout_estime" 
+                           value="{{ intervention[4] or '' }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="type_travaux" class="form-label">Type de Travaux</label>
+                <textarea class="form-control" id="type_travaux" name="type_travaux" rows="4">{{ intervention[3] or '' }}</textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('interventions.view_intervention', id=intervention[0]) }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-check-circle"></i> Mettre à Jour
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

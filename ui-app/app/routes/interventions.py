@@ -203,3 +203,59 @@ def delete_intervention(id):
         cur.close()
     
     return redirect(url_for('interventions.list_interventions'))
+
+@interventions_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_intervention(id):
+    """Edit an existing intervention."""
+    conn = get_db()
+    cur = conn.cursor()
+    
+    if request.method == 'POST':
+        date_debut = request.form.get('date_debut') or None
+        date_fin = request.form.get('date_fin') or None
+        type_travaux = request.form.get('type_travaux')
+        cout_estime = request.form.get('cout_estime') or None
+        id_prestataire = request.form['id_prestataire']
+        statut_travaux = request.form.get('statut_travaux')
+        
+        try:
+            cur.execute('''
+                UPDATE INTERVENTION 
+                SET date_debut = %s, date_fin = %s, type_travaux = %s,
+                    cout_estime = %s, id_prestataire = %s, statut_travaux = %s
+                WHERE id_interv = %s
+            ''', (date_debut, date_fin, type_travaux, cout_estime, 
+                  id_prestataire, statut_travaux, id))
+            conn.commit()
+            cur.close()
+            flash('Intervention modifiée avec succès!', 'success')
+            return redirect(url_for('interventions.view_intervention', id=id))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Erreur: {str(e)}', 'danger')
+    
+    cur.execute('''
+        SELECT i.id_interv, i.date_debut, i.date_fin, i.type_travaux,
+               i.cout_estime, i.est_validee, i.statut_travaux,
+               i.code_batiment, i.id_prestataire,
+               b.nom_batiment
+        FROM INTERVENTION i
+        JOIN BATIMENT b ON i.code_batiment = b.code_batiment
+        WHERE i.id_interv = %s
+    ''', (id,))
+    intervention = cur.fetchone()
+    
+    if not intervention:
+        cur.close()
+        flash('Intervention non trouvée!', 'warning')
+        return redirect(url_for('interventions.list_interventions'))
+    
+    cur.execute('SELECT id_prestataire, nom_entreprise, role_prest FROM PRESTATAIRE ORDER BY nom_entreprise')
+    prestataires = cur.fetchall()
+    cur.close()
+    
+    statuts = ['Planifié', 'En cours', 'Terminé', 'Annulé']
+    return render_template('interventions/edit.html', 
+                          intervention=intervention, 
+                          prestataires=prestataires,
+                          statuts=statuts)

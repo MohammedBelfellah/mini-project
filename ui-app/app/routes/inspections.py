@@ -144,11 +144,53 @@ def delete_inspection(id):
     try:
         cur.execute('DELETE FROM INSPECTION WHERE id_inspect = %s', (id,))
         conn.commit()
-        flash('Inspection supprimée!', 'success')
+        flash('Inspection supprimée avec succès!', 'success')
     except Exception as e:
         conn.rollback()
-        flash(f'Erreur: {str(e)}', 'danger')
+        flash(f'Erreur lors de la suppression: {str(e)}', 'danger')
     finally:
         cur.close()
     
     return redirect(url_for('inspections.list_inspections'))
+
+@inspections_bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_inspection(id):
+    """Edit an existing inspection."""
+    conn = get_db()
+    cur = conn.cursor()
+    
+    if request.method == 'POST':
+        date_visite = request.form['date_visite']
+        rapport = request.form.get('rapport')
+        etat_constate = request.form['etat_constate']
+        
+        try:
+            cur.execute('''
+                UPDATE INSPECTION 
+                SET date_visite = %s, rapport = %s, etat_constate = %s
+                WHERE id_inspect = %s
+            ''', (date_visite, rapport, etat_constate, id))
+            conn.commit()
+            cur.close()
+            flash('Inspection modifiée avec succès!', 'success')
+            return redirect(url_for('inspections.view_inspection', id=id))
+        except Exception as e:
+            conn.rollback()
+            flash(f'Erreur: {str(e)}', 'danger')
+    
+    cur.execute('''
+        SELECT i.id_inspect, i.date_visite, i.etat_constate, i.rapport, 
+               i.code_batiment, b.nom_batiment
+        FROM INSPECTION i
+        JOIN BATIMENT b ON i.code_batiment = b.code_batiment
+        WHERE i.id_inspect = %s
+    ''', (id,))
+    inspection = cur.fetchone()
+    cur.close()
+    
+    if not inspection:
+        flash('Inspection non trouvée!', 'warning')
+        return redirect(url_for('inspections.list_inspections'))
+    
+    etats = ['Bon', 'Moyen', 'Dégradé', 'En ruine']
+    return render_template('inspections/edit.html', inspection=inspection, etats=etats)
