@@ -10,11 +10,17 @@ def create_app(config_class=Config):
     db.init_app(app)
     
     # Register blueprints
-    from .routes import buildings_bp, inspections_bp, interventions_bp, dashboard_bp
+    from .routes import (buildings_bp, inspections_bp, interventions_bp, 
+                         dashboard_bp, prestataires_bp, zones_bp,
+                         protections_bp, proprietaires_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(buildings_bp)
     app.register_blueprint(inspections_bp)
     app.register_blueprint(interventions_bp)
+    app.register_blueprint(prestataires_bp)
+    app.register_blueprint(zones_bp)
+    app.register_blueprint(protections_bp)
+    app.register_blueprint(proprietaires_bp)
     
     @app.route('/test-db')
     def test_db_connection():

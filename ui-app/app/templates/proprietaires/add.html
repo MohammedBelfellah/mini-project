@@ -1,0 +1,94 @@
+{% extends "base.html" %} {% block title %}Ajouter un Propriétaire{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-plus-circle"></i> Ajouter un Propriétaire</h1>
+  <a
+    href="{{ url_for('proprietaires.list_proprietaires') }}"
+    class="btn btn-secondary"
+  >
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form
+      method="POST"
+      action="{{ url_for('proprietaires.add_proprietaire') }}"
+    >
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nom_complet" class="form-label">
+            Nom Complet <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="nom_complet"
+            name="nom_complet"
+            placeholder="Ex: Ministère de la Culture, M. Ahmed Alami..."
+            required
+          />
+          <div class="form-text">
+            Nom du propriétaire (personne ou organisme)
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="type_proprio" class="form-label"
+            >Type de Propriétaire</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="type_proprio"
+            name="type_proprio"
+            list="types_list"
+            placeholder="Ex: Public, Privé..."
+          />
+          <datalist id="types_list">
+            {% for type in existing_types %}
+            <option value="{{ type }}">{% endfor %}</option>
+
+            <option value="Public"></option>
+            <option value="Privé"></option>
+            <option value="Mixte"></option>
+            <option value="Habous"></option>
+            <option value="Communal"></option>
+            <option value="Étatique"></option>
+            <option value="Associatif"></option>
+          </datalist>
+
+          <div class="form-text">Catégorie du propriétaire</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="contact" class="form-label">Contact</label>
+          <input
+            type="text"
+            class="form-control"
+            id="contact"
+            name="contact"
+            placeholder="Ex: +212 5XX XX XX XX, email@domain.ma"
+          />
+          <div class="form-text">Téléphone ou email de contact</div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a
+          href="{{ url_for('proprietaires.list_proprietaires') }}"
+          class="btn btn-secondary"
+        >
+          <i class="bi bi-x-circle"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle"></i> Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

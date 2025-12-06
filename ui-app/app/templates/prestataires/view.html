@@ -1,0 +1,162 @@
+{% extends "base.html" %} {% block title %}{{ prestataire[1] }} - Détails{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-building-gear"></i> {{ prestataire[1] }}</h1>
+  <div>
+    <a
+      href="{{ url_for('prestataires.edit_prestataire', id=prestataire[0]) }}"
+      class="btn btn-warning"
+    >
+      <i class="bi bi-pencil"></i> Modifier
+    </a>
+    <a
+      href="{{ url_for('prestataires.list_prestataires') }}"
+      class="btn btn-secondary"
+    >
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<!-- Prestataire Info Card -->
+<div class="card mb-4">
+  <div class="card-header bg-info text-white">
+    <h5 class="mb-0">
+      <i class="bi bi-info-circle"></i> Informations du Prestataire
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>ID:</strong> {{ prestataire[0] }}</p>
+        <p><strong>Nom de l'Entreprise:</strong> {{ prestataire[1] }}</p>
+        <p>
+          <strong>Rôle / Spécialité:</strong>
+          {% if prestataire[2] %}
+          <span class="badge bg-info fs-6">{{ prestataire[2] }}</span>
+          {% else %}
+          <span class="text-muted">Non spécifié</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <!-- Statistics -->
+        <div class="row text-center">
+          <div class="col-6 col-md-4 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-primary mb-0">{{ stats[0] }}</h3>
+              <small class="text-muted">Total Interventions</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-success mb-0">{{ stats[1] }}</h3>
+              <small class="text-muted">Validées</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-4 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-warning mb-0">{{ stats[2] }}</h3>
+              <small class="text-muted">En cours</small>
+            </div>
+          </div>
+        </div>
+        <p class="text-center mt-2">
+          <strong>Coût Total Estimé:</strong>
+          <span class="badge bg-dark fs-6"
+            >{{ "{:,.2f}".format(stats[4]) }} MAD</span
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interventions -->
+<div class="card">
+  <div
+    class="card-header bg-warning text-white d-flex justify-content-between align-items-center"
+  >
+    <h5 class="mb-0">
+      <i class="bi bi-tools"></i> Interventions ({{ interventions|length }})
+    </h5>
+    <a
+      href="{{ url_for('interventions.add_intervention') }}"
+      class="btn btn-sm btn-light"
+    >
+      <i class="bi bi-plus"></i> Nouvelle Intervention
+    </a>
+  </div>
+  <div class="card-body">
+    {% if interventions %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bâtiment</th>
+            <th>Date Début</th>
+            <th>Type de Travaux</th>
+            <th>Coût Estimé</th>
+            <th>Statut</th>
+            <th>Validée</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in interventions %}
+          <tr>
+            <td><strong>{{ i[0] }}</strong></td>
+            <td>
+              <a href="{{ url_for('buildings.view_building', id=i[7]) }}">
+                {{ i[8] }}
+              </a>
+            </td>
+            <td>{{ i[1]|safe_strftime if i[1] else 'N/A' }}</td>
+            <td>
+              {{ (i[3][:30] + '...') if i[3] and i[3]|length > 30 else (i[3] or
+              'N/A') }}
+            </td>
+            <td>{{ "{:,.2f}".format(i[4]) if i[4] else 'N/A' }} MAD</td>
+            <td>
+              {% if i[6] == 'Terminé' %}
+              <span class="badge bg-success">{{ i[6] }}</span>
+              {% elif i[6] == 'En cours' %}
+              <span class="badge bg-primary">{{ i[6] }}</span>
+              {% elif i[6] == 'Planifié' %}
+              <span class="badge bg-info">{{ i[6] }}</span>
+              {% else %}
+              <span class="badge bg-secondary">{{ i[6] or 'N/A' }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if i[5] %}
+              <span class="badge bg-success"><i class="bi bi-check"></i></span>
+              {% else %}
+              <span class="badge bg-secondary"
+                ><i class="bi bi-clock"></i
+              ></span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{{ url_for('interventions.view_intervention', id=i[0]) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="bi bi-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center py-4">
+      <i class="bi bi-inbox" style="font-size: 2rem"></i><br />
+      Aucune intervention enregistrée pour ce prestataire.
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

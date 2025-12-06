@@ -1,0 +1,119 @@
+{% extends "base.html" %} {% block title %}{{ protection[1] }} - Détails{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-shield-fill-check"></i> {{ protection[1] }}</h1>
+  <div>
+    <a
+      href="{{ url_for('protections.edit_protection', id=protection[0]) }}"
+      class="btn btn-warning"
+    >
+      <i class="bi bi-pencil"></i> Modifier
+    </a>
+    <a
+      href="{{ url_for('protections.list_protections') }}"
+      class="btn btn-secondary"
+    >
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<!-- Protection Info Card -->
+<div class="card mb-4">
+  <div class="card-header bg-success text-white">
+    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>ID:</strong> {{ protection[0] }}</p>
+        <p>
+          <strong>Niveau:</strong>
+          <span class="badge bg-success fs-6">{{ protection[1] }}</span>
+        </p>
+      </div>
+      <div class="col-md-6">
+        <div class="border rounded p-3 text-center">
+          <h3 class="text-primary mb-0">{{ buildings|length }}</h3>
+          <small class="text-muted">Bâtiment(s) avec ce niveau</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Buildings with this protection level -->
+<div class="card">
+  <div
+    class="card-header bg-info text-white d-flex justify-content-between align-items-center"
+  >
+    <h5 class="mb-0">
+      <i class="bi bi-buildings"></i> Bâtiments ({{ buildings|length }})
+    </h5>
+    <a
+      href="{{ url_for('buildings.add_building') }}"
+      class="btn btn-sm btn-light"
+    >
+      <i class="bi bi-plus"></i> Ajouter un Bâtiment
+    </a>
+  </div>
+  <div class="card-body">
+    {% if buildings %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Adresse</th>
+            <th>Zone</th>
+            <th>Type</th>
+            <th>État</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in buildings %}
+          <tr>
+            <td><strong>{{ b[0] }}</strong></td>
+            <td>{{ b[1] }}</td>
+            <td>{{ b[2] or '-' }}</td>
+            <td>{{ b[3] or '-' }}</td>
+            <td>{{ b[4] or '-' }}</td>
+            <td>
+              {% if b[5] == 'Bon' %}
+              <span class="badge bg-success">{{ b[5] }}</span>
+              {% elif b[5] == 'Moyen' %}
+              <span class="badge bg-warning text-dark">{{ b[5] }}</span>
+              {% elif b[5] == 'Dégradé' %}
+              <span class="badge" style="background-color: #e67e22"
+                >{{ b[5] }}</span
+              >
+              {% elif b[5] == 'En ruine' %}
+              <span class="badge bg-danger">{{ b[5] }}</span>
+              {% else %}
+              <span class="badge bg-secondary">Non inspecté</span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{{ url_for('buildings.view_building', id=b[0]) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="bi bi-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center py-4">
+      <i class="bi bi-inbox" style="font-size: 2rem"></i><br />
+      Aucun bâtiment avec ce niveau de protection.
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
