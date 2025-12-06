@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Documents{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-file-earmark-image"></i> Liste des Documents</h1>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDocModal">
+        <i class="bi bi-plus-circle"></i> Ajouter un Document
+    </button>
+</div>
+
+<!-- Search and Filter Card -->
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Recherche et Filtres</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('documents.list_all_documents') }}" id="filterForm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label"><i class="bi bi-search"></i> Recherche</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Titre, bâtiment..." value="{{ current_search }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="type_doc" class="form-label"><i class="bi bi-tag"></i> Type</label>
+                    <select class="form-select" id="type_doc" name="type_doc">
+                        <option value="">Tous les types</option>
+                        {% for t in types %}
+                        <option value="{{ t[0] }}" {% if current_type == t[0] %}selected{% endif %}>
+                            {{ t[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="building" class="form-label"><i class="bi bi-building"></i> Bâtiment</label>
+                    <select class="form-select" id="building" name="building">
+                        <option value="">Tous les bâtiments</option>
+                        {% for b in buildings %}
+                        <option value="{{ b[0] }}" {% if current_building|string == b[0]|string %}selected{% endif %}>
+                            {{ b[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-info me-2">
+                        <i class="bi bi-funnel"></i> Filtrer
+                    </button>
+                    <a href="{{ url_for('documents.list_all_documents') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted">
+        <i class="bi bi-file-earmark"></i> {{ documents|length }} document(s) trouvé(s)
+    </span>
+</div>
+
+{% if documents %}
+<div class="row">
+    {% for doc in documents %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                {% if doc[2] == 'Photo' %}
+                <i class="bi bi-image text-success" style="font-size: 4rem;"></i>
+                {% elif doc[2] == 'Plan' %}
+                <i class="bi bi-map text-primary" style="font-size: 4rem;"></i>
+                {% elif doc[2] == 'PDF' %}
+                <i class="bi bi-file-pdf text-danger" style="font-size: 4rem;"></i>
+                {% elif doc[2] == 'Vidéo' %}
+                <i class="bi bi-camera-video text-warning" style="font-size: 4rem;"></i>
+                {% else %}
+                <i class="bi bi-file-earmark text-secondary" style="font-size: 4rem;"></i>
+                {% endif %}
+                
+                <h6 class="card-title mt-3">{{ doc[1] }}</h6>
+                <span class="badge bg-info">{{ doc[2] }}</span>
+                <p class="small text-muted mt-2 mb-0">
+                    <a href="{{ url_for('buildings.view_building', id=doc[4]) }}">
+                        <i class="bi bi-building"></i> {{ doc[5] }}
+                    </a>
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="btn-group btn-group-sm w-100">
+                    <a href="{{ url_for('documents.view_document', id=doc[0]) }}" 
+                       class="btn btn-outline-primary" title="Voir">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('documents.edit_document', id=doc[0]) }}" 
+                       class="btn btn-outline-warning" title="Modifier">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <button type="button" class="btn btn-outline-danger" 
+                            title="Supprimer"
+                            onclick="confirmDelete({{ doc[0] }}, '{{ doc[1]|e }}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+        <p class="text-muted mt-3 mb-0">Aucun document trouvé.</p>
+        <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addDocModal">
+            <i class="bi bi-plus-circle"></i> Ajouter le premier document
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Add Document Modal -->
+<div class="modal fade" id="addDocModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Ajouter un Document</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('documents.add_document_global') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="code_batiment" class="form-label">
+                            Bâtiment <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="code_batiment" name="code_batiment" required>
+                            <option value="">-- Sélectionner un bâtiment --</option>
+                            {% for b in buildings %}
+                            <option value="{{ b[0] }}">{{ b[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="titre_doc" class="form-label">
+                                Titre du Document <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="titre_doc" name="titre_doc" 
+                                   placeholder="Ex: Photo façade principale" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="type_doc_add" class="form-label">
+                                Type de Document <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="type_doc_add" name="type_doc" required>
+                                <option value="">-- Sélectionner --</option>
+                                <option value="Photo">Photo</option>
+                                <option value="Plan">Plan</option>
+                                <option value="PDF">PDF</option>
+                                <option value="Vidéo">Vidéo</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="url_fichier" class="form-label">
+                            URL du Fichier <span class="text-danger">*</span>
+                        </label>
+                        <input type="url" class="form-control" id="url_fichier" name="url_fichier" 
+                               placeholder="https://exemple.com/document.pdf" required>
+                        <div class="form-text">Lien vers le fichier (Google Drive, Dropbox, serveur, etc.)</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le document <strong id="docName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete(id, name) {
+        document.getElementById('docName').textContent = name;
+        document.getElementById('deleteForm').action = `/documents/delete/${id}`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    document.querySelectorAll('#filterForm select').forEach(select => {
+        select.addEventListener('change', () => document.getElementById('filterForm').submit());
+    });
+</script>
+{% endblock %}

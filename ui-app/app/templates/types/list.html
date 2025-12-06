@@ -1,0 +1,183 @@
+{% extends "base.html" %} {% block title %}Types de Bâtiments{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-house-door"></i> Types de Bâtiments</h1>
+  <a href="{{ url_for('types.add_type') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Ajouter un Type
+  </a>
+</div>
+
+<!-- Search Card -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0"><i class="bi bi-search"></i> Recherche</h5>
+  </div>
+  <div class="card-body">
+    <form
+      method="GET"
+      action="{{ url_for('types.list_types') }}"
+      id="filterForm"
+    >
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label for="search" class="form-label"
+            ><i class="bi bi-search"></i> Recherche</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="search"
+            name="search"
+            placeholder="Type de bâtiment..."
+            value="{{ current_search }}"
+          />
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary me-2">
+            <i class="bi bi-funnel"></i> Filtrer
+          </button>
+          <a
+            href="{{ url_for('types.list_types') }}"
+            class="btn btn-outline-secondary"
+          >
+            <i class="bi bi-x-circle"></i>
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <span class="text-muted">
+    <i class="bi bi-house-door"></i> {{ types|length }} type(s) de bâtiment
+  </span>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Type de Bâtiment</th>
+            <th>Bâtiments</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if types %} {% for t in types %}
+          <tr>
+            <td><strong>{{ t[0] }}</strong></td>
+            <td>
+              <i class="bi bi-house-door-fill text-primary"></i>
+              {{ t[1] }}
+            </td>
+            <td>
+              <span class="badge bg-info">{{ t[2] }} bâtiment(s)</span>
+            </td>
+            <td class="text-center">
+              <div class="btn-group btn-group-sm">
+                <a
+                  href="{{ url_for('types.view_type', id=t[0]) }}"
+                  class="btn btn-outline-primary"
+                  title="Voir"
+                >
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a
+                  href="{{ url_for('types.edit_type', id=t[0]) }}"
+                  class="btn btn-outline-warning"
+                  title="Modifier"
+                >
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger"
+                  title="Supprimer"
+                  data-id="{{ t[0] }}"
+                  data-name="{{ t[1]|e }}"
+                  data-count="{{ t[2] }}"
+                  onclick="confirmDelete(this.dataset.id, this.dataset.name, this.dataset.count)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %} {% else %}
+          <tr>
+            <td colspan="4" class="text-center py-4">
+              <i class="bi bi-inbox text-muted" style="font-size: 2rem"></i>
+              <p class="text-muted mt-2 mb-0">Aucun type de bâtiment trouvé.</p>
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle"></i> Confirmer la suppression
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Êtes-vous sûr de vouloir supprimer le type
+          <strong id="typeName"></strong>?
+        </p>
+        <div id="warningMessage" class="alert alert-warning d-none">
+          <i class="bi bi-exclamation-triangle"></i> Ce type est utilisé par des
+          bâtiments et ne peut pas être supprimé.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <form id="deleteForm" method="POST" style="display: inline">
+          <button type="submit" class="btn btn-danger" id="deleteBtn">
+            <i class="bi bi-trash"></i> Supprimer
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  function confirmDelete(id, name, count) {
+    document.getElementById("typeName").textContent = name;
+    document.getElementById("deleteForm").action = `/types/delete/${id}`;
+
+    const warningMsg = document.getElementById("warningMessage");
+    const deleteBtn = document.getElementById("deleteBtn");
+
+    if (parseInt(count) > 0) {
+      warningMsg.classList.remove("d-none");
+      deleteBtn.disabled = true;
+    } else {
+      warningMsg.classList.add("d-none");
+      deleteBtn.disabled = false;
+    }
+
+    new bootstrap.Modal(document.getElementById("deleteModal")).show();
+  }
+</script>
+{% endblock %}
