@@ -115,12 +115,12 @@
                             <td><strong>{{ intervention[0] }}</strong></td>
                             <td>
                                 <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}">
-                                    {{ intervention[8] }}
+                                    <i class="bi bi-building"></i> {{ intervention[8] }}
                                 </a>
                             </td>
                             <td>
                                 {% if intervention[1] %}
-                                    {% if intervention[1] is string %}{{ intervention[1] }}{% else %}{{ intervention[1].strftime('%d/%m/%Y') }}{% endif %}
+                                    {{ intervention[1]|safe_strftime }}
                                 {% else %}N/A{% endif %}
                             </td>
                             <td>{{ (intervention[3][:30] + '...') if intervention[3] and intervention[3]|length > 30 else (intervention[3] or 'N/A') }}</td>
@@ -141,9 +141,9 @@
                             </td>
                             <td>
                                 {% if intervention[5] %}
-                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Oui</span>
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Oui</span>
                                 {% else %}
-                                    <span class="badge bg-secondary"><i class="bi bi-clock"></i> Non</span>
+                                <span class="badge bg-secondary"><i class="bi bi-clock"></i> Non</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
@@ -152,10 +152,14 @@
                                        class="btn btn-outline-primary" title="Voir">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    <a href="{{ url_for('interventions.edit_intervention', id=intervention[0]) }}" 
+                                       class="btn btn-outline-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     <button type="button" class="btn btn-outline-danger" 
                                             title="Supprimer"
                                             data-intervention-id="{{ intervention[0] }}"
-                                            onclick="confirmDelete(this.getAttribute('data-intervention-id'))">
+                                            onclick="confirmDelete(this.dataset.interventionId)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>

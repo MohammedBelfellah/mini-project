@@ -41,8 +41,8 @@ block content %}
           />
           <datalist id="types_list">
             {% for type in existing_types %}
-            <option value="{{ type }}">{% endfor %}</option>
-
+            <option value="{{ type }}"></option>
+            {% endfor %}
             <option value="Quartier"></option>
             <option value="Secteur"></option>
             <option value="Arrondissement"></option>

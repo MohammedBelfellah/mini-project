@@ -44,8 +44,8 @@
           />
           <datalist id="roles_list">
             {% for role in existing_roles %}
-            <option value="{{ role }}">{% endfor %}</option>
-
+            <option value="{{ role }}"></option>
+            {% endfor %}
             <option value="Architecte"></option>
             <option value="Entreprise BTP"></option>
             <option value="Bureau d'Études"></option>

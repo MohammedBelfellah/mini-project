@@ -127,7 +127,10 @@
                                     </a>
                                     <button type="button" class="btn btn-outline-danger" 
                                             title="Supprimer"
-                                            onclick="confirmDelete({{ i[0] }}, '{{ i[5]|e }}', '{{ i[1].strftime('%d/%m/%Y') if i[1] else 'N/A' }}')">
+                                            data-id="{{ i[0] }}"
+                                            data-building="{{ i[5]|e }}"
+                                            data-date="{{ i[1].strftime('%d/%m/%Y') if i[1] else 'N/A' }}"
+                                            onclick="confirmDelete(this.dataset.id, this.dataset.building, this.dataset.date)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -180,13 +183,15 @@
     function confirmDelete(id, building, date) {
         document.getElementById('inspBuilding').textContent = building;
         document.getElementById('inspDate').textContent = date;
-        document.getElementById('deleteForm').action = `/inspections/delete/${id}`;
+        document.getElementById('deleteForm').action = '/inspections/delete/' + id;
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
     
     // Auto-submit on filter change
-    document.querySelectorAll('#filterForm select').forEach(select => {
-        select.addEventListener('change', () => document.getElementById('filterForm').submit());
+    document.querySelectorAll('#filterForm select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
     });
 </script>
 {% endblock %}
