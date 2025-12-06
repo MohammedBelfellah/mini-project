@@ -1,150 +1,129 @@
-{% extends "base.html" %}
-
-{% block title %}Détails de l'Intervention{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Détails de l'Intervention{% endblock
+%} {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-tools"></i> Détails de l'Intervention</h1>
-    <div>
-        <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}" class="btn btn-primary">
-            <i class="bi bi-building"></i> Voir le Bâtiment
-        </a>
-        <a href="{{ url_for('interventions.list_interventions') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Retour
-        </a>
-    </div>
+  <h1><i class="bi bi-tools"></i> Détails de l'Intervention</h1>
+  <div>
+    <a
+      href="{{ url_for('buildings.view_building', id=intervention[7]) }}"
+      class="btn btn-primary"
+    >
+      <i class="bi bi-building"></i> Voir le Bâtiment
+    </a>
+    <a
+      href="{{ url_for('interventions.list_interventions') }}"
+      class="btn btn-secondary"
+    >
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
 </div>
 
 <div class="card mb-4">
-    <div class="card-header bg-warning text-white">
-        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations de l'Intervention</h5>
+  <div class="card-header bg-warning text-white">
+    <h5 class="mb-0">
+      <i class="bi bi-info-circle"></i> Informations de l'Intervention
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>ID Intervention:</strong> {{ intervention[0] }}</p>
+        <p>
+          <strong>Bâtiment:</strong>
+          <a
+            href="{{ url_for('buildings.view_building', id=intervention[7]) }}"
+          >
+            {{ intervention[11] }}
+          </a>
+        </p>
+        <p><strong>Adresse:</strong> {{ intervention[12] or 'N/A' }}</p>
+        <p>
+          <strong>Date Début:</strong> {{ intervention[1].strftime('%d/%m/%Y')
+          if intervention[1] else 'N/A' }}
+        </p>
+        <p>
+          <strong>Date Fin:</strong> {{ intervention[2].strftime('%d/%m/%Y') if
+          intervention[2] else 'N/A' }}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Prestataire:</strong> {{ intervention[13] }}</p>
+        <p><strong>Rôle:</strong> {{ intervention[14] or 'N/A' }}</p>
+        <p>
+          <strong>Coût Estimé:</strong> {{ "{:,.2f}".format(intervention[4]) if
+          intervention[4] else 'N/A' }} MAD
+        </p>
+        <p>
+          <strong>Statut:</strong>
+          <span class="badge bg-info">{{ intervention[6] or 'N/A' }}</span>
+        </p>
+        <p>
+          <strong>Validée:</strong>
+          {% if intervention[5] %}
+          <span class="badge bg-success fs-6"
+            ><i class="bi bi-check-circle"></i> Oui</span
+          >
+          <br /><small class="text-muted"
+            >Date: {{ intervention[9].strftime('%d/%m/%Y') if intervention[9]
+            else 'N/A' }}</small
+          >
+          {% else %}
+          <span class="badge bg-secondary fs-6"
+            ><i class="bi bi-clock"></i> En attente</span
+          >
+          {% endif %}
+        </p>
+      </div>
     </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <p><strong>ID Intervention:</strong> {{ intervention[0] }}</p>
-                <p><strong>Bâtiment:</strong> <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}">{{ intervention[8] }}</a></p>
-                <p><strong>Adresse:</strong> {{ intervention[9] or 'N/A' }}</p>
-                <p><strong>Date Début:</strong> {{ intervention[1].strftime('%d/%m/%Y') if intervention[1] else 'N/A' }}</p>
-                <p><strong>Date Fin:</strong> {{ intervention[2].strftime('%d/%m/%Y') if intervention[2] else 'N/A' }}</p>
-            </div>
-            <div class="col-md-6">
-                <p><strong>Prestataire:</strong> {{ intervention[10] }}</p>
-                <p><strong>Rôle:</strong> {{ intervention[11] or 'N/A' }}</p>
-                <p><strong>Coût Estimé:</strong> {{ "{:,.2f}".format(intervention[4]) if intervention[4] else 'N/A' }} MAD</p>
-                <p><strong>Statut:</strong> <span class="badge bg-info">{{ intervention[6] or 'N/A' }}</span></p>
-                <p><strong>Validée:</strong> 
-                    {% if intervention[5] %}
-                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> Oui</span>
-                        <br><small class="text-muted">Date: {{ intervention[12].strftime('%d/%m/%Y') if intervention[12] else 'N/A' }}</small>
-                    {% else %}
-                        <span class="badge bg-secondary fs-6"><i class="bi bi-clock"></i> En attente</span>
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-        
-        {% if intervention[3] %}
-        <hr>
-        <h6 class="mb-3"><strong>Description des Travaux:</strong></h6>
-        <div class="alert alert-light">
-            <p class="mb-0" style="white-space: pre-wrap;">{{ intervention[3] }}</p>
-        </div>
-        {% endif %}
-        
-        {% if intervention[13] %}
-        <hr>
-        <h6 class="mb-3"><strong>Commentaire de Validation:</strong></h6>
-        <div class="alert alert-success">
-            <p class="mb-0" style="white-space: pre-wrap;">{{ intervention[13] }}</p>
-        </div>
-        {% endif %}
+
+    {% if intervention[3] %}
+    <hr />
+    <h6 class="mb-3"><strong>Description des Travaux:</strong></h6>
+    <div class="alert alert-light">
+      <p class="mb-0" style="white-space: pre-wrap">{{ intervention[3] }}</p>
     </div>
+    {% endif %} {% if intervention[10] %}
+    <hr />
+    <h6 class="mb-3"><strong>Commentaire de Validation:</strong></h6>
+    <div class="alert alert-success">
+      <p class="mb-0" style="white-space: pre-wrap">{{ intervention[10] }}</p>
+    </div>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Validation Form -->
 {% if not intervention[5] %}
 <div class="card border-success">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0"><i class="bi bi-check-circle"></i> Valider cette Intervention</h5>
-    </div>
-    <div class="card-body">
-        <form method="POST" action="{{ url_for('interventions.validate_intervention', id=intervention[0]) }}">
-            <div class="mb-3">
-                <label for="commentaire_validation" class="form-label">Commentaire de Validation (optionnel)</label>
-                <textarea class="form-control" id="<!-- filepath: app/templates/interventions/view.html -->
-{% extends "base.html" %}
+  <div class="card-header bg-success text-white">
+    <h5 class="mb-0">
+      <i class="bi bi-check-circle"></i> Valider cette Intervention
+    </h5>
+  </div>
+  <div class="card-body">
+    <form
+      method="POST"
+      action="{{ url_for('interventions.validate_intervention', id=intervention[0]) }}"
+    >
+      <div class="mb-3">
+        <label for="commentaire_validation" class="form-label"
+          >Commentaire de Validation (optionnel)</label
+        >
+        <textarea
+          class="form-control"
+          id="commentaire_validation"
+          name="commentaire_validation"
+          rows="3"
+          placeholder="Ajouter un commentaire..."
+        ></textarea>
+      </div>
 
-{% block title %}Détails de l'Intervention{% endblock %}
-
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><i class="bi bi-tools"></i> Détails de l'Intervention</h1>
-    <div>
-        <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}" class="btn btn-primary">
-            <i class="bi bi-building"></i> Voir le Bâtiment
-        </a>
-        <a href="{{ url_for('interventions.list_interventions') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Retour
-        </a>
-    </div>
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-check-circle"></i> Valider l'Intervention
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
-
-<div class="card mb-4">
-    <div class="card-header bg-warning text-white">
-        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations de l'Intervention</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <p><strong>ID Intervention:</strong> {{ intervention[0] }}</p>
-                <p><strong>Bâtiment:</strong> <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}">{{ intervention[8] }}</a></p>
-                <p><strong>Adresse:</strong> {{ intervention[9] or 'N/A' }}</p>
-                <p><strong>Date Début:</strong> {{ intervention[1].strftime('%d/%m/%Y') if intervention[1] else 'N/A' }}</p>
-                <p><strong>Date Fin:</strong> {{ intervention[2].strftime('%d/%m/%Y') if intervention[2] else 'N/A' }}</p>
-            </div>
-            <div class="col-md-6">
-                <p><strong>Prestataire:</strong> {{ intervention[10] }}</p>
-                <p><strong>Rôle:</strong> {{ intervention[11] or 'N/A' }}</p>
-                <p><strong>Coût Estimé:</strong> {{ "{:,.2f}".format(intervention[4]) if intervention[4] else 'N/A' }} MAD</p>
-                <p><strong>Statut:</strong> <span class="badge bg-info">{{ intervention[6] or 'N/A' }}</span></p>
-                <p><strong>Validée:</strong> 
-                    {% if intervention[5] %}
-                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> Oui</span>
-                        <br><small class="text-muted">Date: {{ intervention[12].strftime('%d/%m/%Y') if intervention[12] else 'N/A' }}</small>
-                    {% else %}
-                        <span class="badge bg-secondary fs-6"><i class="bi bi-clock"></i> En attente</span>
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-        
-        {% if intervention[3] %}
-        <hr>
-        <h6 class="mb-3"><strong>Description des Travaux:</strong></h6>
-        <div class="alert alert-light">
-            <p class="mb-0" style="white-space: pre-wrap;">{{ intervention[3] }}</p>
-        </div>
-        {% endif %}
-        
-        {% if intervention[13] %}
-        <hr>
-        <h6 class="mb-3"><strong>Commentaire de Validation:</strong></h6>
-        <div class="alert alert-success">
-            <p class="mb-0" style="white-space: pre-wrap;">{{ intervention[13] }}</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Validation Form -->
-{% if not intervention[5] %}
-<div class="card border-success">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0"><i class="bi bi-check-circle"></i> Valider cette Intervention</h5>
-    </div>
-    <div class="card-body">
-        <form method="POST" action="{{ url_for('interventions.validate_intervention', id=intervention[0]) }}">
-            <div class="mb-3">
-                <label for="commentaire_validation" class="form-label">Commentaire de Validation (optionnel)</label>
-                <textarea class="form-control" id="
+{% endif %} {% endblock %}

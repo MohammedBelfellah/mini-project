@@ -28,4 +28,17 @@ def create_app(config_class=Config):
         except Exception as e:
             return f"<h1>Database Connection Failed!</h1><p>{e}</p>"
 
+    # Custom Jinja filter for safe date formatting
+    @app.template_filter('safe_strftime')
+    def safe_strftime(value, format='%d/%m/%Y'):
+        """Safely format dates that might be strings or date objects."""
+        if value is None:
+            return 'N/A'
+        if isinstance(value, str):
+            return value
+        try:
+            return value.strftime(format)
+        except:
+            return str(value)
+    
     return app

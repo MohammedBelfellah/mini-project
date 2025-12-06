@@ -73,7 +73,11 @@ def view_intervention(id):
     cur = conn.cursor()
     
     cur.execute('''
-        SELECT i.*, b.nom_batiment, b.adresse_rue,
+        SELECT i.id_interv, i.date_debut, i.date_fin, i.type_travaux, 
+               i.cout_estime, i.est_validee, i.statut_travaux,
+               i.code_batiment, i.id_prestataire, i.date_validation,
+               i.commentaire_validation,
+               b.nom_batiment, b.adresse_rue,
                p.nom_entreprise, p.role_prest
         FROM INTERVENTION i
         JOIN BATIMENT b ON i.code_batiment = b.code_batiment
