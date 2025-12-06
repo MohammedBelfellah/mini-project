@@ -10,12 +10,92 @@
     </a>
 </div>
 
-<div class="card">
+<!-- Search and Filter Card -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-white">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Recherche et Filtres</h5>
+    </div>
     <div class="card-body">
-        {% if interventions %}
+        <form method="GET" action="{{ url_for('interventions.list_interventions') }}" id="filterForm">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <label for="search" class="form-label"><i class="bi bi-search"></i> Recherche</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Bâtiment, travaux, prestataire..." value="{{ current_search }}">
+                </div>
+                
+                <div class="col-md-6 col-lg-2">
+                    <label for="building" class="form-label"><i class="bi bi-building"></i> Bâtiment</label>
+                    <select class="form-select" id="building" name="building">
+                        <option value="">Tous</option>
+                        {% for b in buildings %}
+                        <option value="{{ b[0] }}" {% if current_building|string == b[0]|string %}selected{% endif %}>
+                            {{ b[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 col-lg-2">
+                    <label for="statut" class="form-label"><i class="bi bi-flag"></i> Statut</label>
+                    <select class="form-select" id="statut" name="statut">
+                        <option value="">Tous</option>
+                        {% for s in statuts %}
+                        <option value="{{ s[0] }}" {% if current_statut == s[0] %}selected{% endif %}>
+                            {{ s[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 col-lg-2">
+                    <label for="prestataire" class="form-label"><i class="bi bi-person"></i> Prestataire</label>
+                    <select class="form-select" id="prestataire" name="prestataire">
+                        <option value="">Tous</option>
+                        {% for p in prestataires %}
+                        <option value="{{ p[0] }}" {% if current_prestataire|string == p[0]|string %}selected{% endif %}>
+                            {{ p[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 col-lg-2">
+                    <label for="validated" class="form-label"><i class="bi bi-check-circle"></i> Validée</label>
+                    <select class="form-select" id="validated" name="validated">
+                        <option value="">Tous</option>
+                        <option value="yes" {% if current_validated == 'yes' %}selected{% endif %}>Oui</option>
+                        <option value="no" {% if current_validated == 'no' %}selected{% endif %}>Non</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-funnel"></i> Appliquer
+                    </button>
+                    <a href="{{ url_for('interventions.list_interventions') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Réinitialiser
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted">
+        <i class="bi bi-tools"></i> {{ interventions|length }} intervention(s) trouvée(s)
+    </span>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Bâtiment</th>
@@ -25,53 +105,110 @@
                         <th>Prestataire</th>
                         <th>Statut</th>
                         <th>Validée</th>
-                        <th>Actions</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for intervention in interventions %}
-                    <tr>
-                        <td><strong>{{ intervention[0] }}</strong></td>
-                        <td>
-                            <a href="{{ url_for('buildings.view_building', id=intervention[8]) }}">
-                                {{ intervention[7] }}
-                            </a>
-                        </td>
-                        <td>{{ intervention[1].strftime('%d/%m/%Y') if intervention[1] else 'N/A' }}</td>
-                        <td>{{ intervention[3] or 'N/A' }}</td>
-                        <td>{{ "{:,.2f}".format(intervention[4]) if intervention[4] else 'N/A' }} MAD</td>
-                        <td>{{ intervention[9] or 'N/A' }}</td>
-                        <td><span class="badge bg-info">{{ intervention[6] or 'N/A' }}</span></td>
-                        <td>
-                            {% if intervention[5] %}
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Oui</span>
-                            {% else %}
-                                <span class="badge bg-secondary"><i class="bi bi-clock"></i> Non</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{{ url_for('interventions.view_intervention', id=intervention[0]) }}" 
-                               class="btn btn-sm btn-info" title="Voir">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <form method="POST" action="{{ url_for('interventions.delete_intervention', id=intervention[0]) }}" 
-                                  style="display:inline;" 
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette intervention ?');">
-                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                    {% if interventions %}
+                        {% for intervention in interventions %}
+                        <tr>
+                            <td><strong>{{ intervention[0] }}</strong></td>
+                            <td>
+                                <a href="{{ url_for('buildings.view_building', id=intervention[7]) }}">
+                                    {{ intervention[8] }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if intervention[1] %}
+                                    {% if intervention[1] is string %}{{ intervention[1] }}{% else %}{{ intervention[1].strftime('%d/%m/%Y') }}{% endif %}
+                                {% else %}N/A{% endif %}
+                            </td>
+                            <td>{{ (intervention[3][:30] + '...') if intervention[3] and intervention[3]|length > 30 else (intervention[3] or 'N/A') }}</td>
+                            <td>{{ "{:,.2f}".format(intervention[4]) if intervention[4] else 'N/A' }} MAD</td>
+                            <td>{{ intervention[10] or 'N/A' }}</td>
+                            <td>
+                                {% if intervention[6] == 'Terminé' %}
+                                <span class="badge bg-success">{{ intervention[6] }}</span>
+                                {% elif intervention[6] == 'En cours' %}
+                                <span class="badge bg-primary">{{ intervention[6] }}</span>
+                                {% elif intervention[6] == 'Planifié' %}
+                                <span class="badge bg-info">{{ intervention[6] }}</span>
+                                {% elif intervention[6] == 'Annulé' %}
+                                <span class="badge bg-danger">{{ intervention[6] }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ intervention[6] or 'N/A' }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if intervention[5] %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Oui</span>
+                                {% else %}
+                                    <span class="badge bg-secondary"><i class="bi bi-clock"></i> Non</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('interventions.view_intervention', id=intervention[0]) }}" 
+                                       class="btn btn-outline-primary" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            title="Supprimer"
+                                            data-intervention-id="{{ intervention[0] }}"
+                                            onclick="confirmDelete(this.getAttribute('data-intervention-id'))">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2 mb-0">Aucune intervention trouvée.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
-        {% else %}
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Aucune intervention enregistrée pour le moment.
-        </div>
-        {% endif %}
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette intervention?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete(id) {
+        document.getElementById('deleteForm').action = `/interventions/delete/${id}`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    document.querySelectorAll('#filterForm select').forEach(select => {
+        select.addEventListener('change', () => document.getElementById('filterForm').submit());
+    });
+</script>
 {% endblock %}

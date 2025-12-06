@@ -5,23 +5,108 @@ buildings_bp = Blueprint('buildings', __name__, url_prefix='/buildings')
 
 @buildings_bp.route('/')
 def list_buildings():
-    """List all buildings with their details."""
+    """List all buildings with search and filtering."""
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('''
-        SELECT b.code_batiment, b.nom_batiment, b.adresse_rue, 
+    
+    # Get filter parameters from URL
+    search = request.args.get('search', '').strip()
+    zone_filter = request.args.get('zone', '')
+    type_filter = request.args.get('type', '')
+    protection_filter = request.args.get('protection', '')
+    etat_filter = request.args.get('etat', '')
+    
+    # Base query
+    query = '''
+        SELECT DISTINCT b.code_batiment, b.nom_batiment, b.adresse_rue, 
                z.nom_zone, t.libelle_type, n.niveau, p.nom_complet,
-               b.latitude, b.longitude
+               b.latitude, b.longitude,
+               (SELECT i.etat_constate FROM INSPECTION i 
+                WHERE i.code_batiment = b.code_batiment 
+                ORDER BY i.date_visite DESC LIMIT 1) as dernier_etat
         FROM BATIMENT b
         LEFT JOIN ZONE_URBAINE z ON b.id_zone = z.id_zone
         LEFT JOIN TYPE_BATIMENT t ON b.id_type = t.id_type
         LEFT JOIN NIV_PROTECTION n ON b.id_protection = n.id_protection
         LEFT JOIN PROPRIETAIRE p ON b.id_proprio = p.id_proprio
-        ORDER BY b.code_batiment DESC
-    ''')
+        WHERE 1=1
+    '''
+    
+    params = []
+    
+    # Add search condition
+    if search:
+        query += ''' AND (
+            LOWER(b.nom_batiment) LIKE LOWER(%s) OR 
+            LOWER(b.adresse_rue) LIKE LOWER(%s) OR
+            LOWER(z.nom_zone) LIKE LOWER(%s) OR
+            CAST(b.code_batiment AS TEXT) LIKE %s
+        )'''
+        search_param = f'%{search}%'
+        params.extend([search_param, search_param, search_param, search_param])
+    
+    # Add zone filter
+    if zone_filter:
+        query += ' AND b.id_zone = %s'
+        params.append(zone_filter)
+    
+    # Add type filter
+    if type_filter:
+        query += ' AND b.id_type = %s'
+        params.append(type_filter)
+    
+    # Add protection filter
+    if protection_filter:
+        query += ' AND b.id_protection = %s'
+        params.append(protection_filter)
+    
+    # Add etat filter (based on latest inspection)
+    if etat_filter:
+        query += '''
+            AND b.code_batiment IN (
+                SELECT i.code_batiment FROM INSPECTION i
+                WHERE i.etat_constate = %s
+                AND i.date_visite = (
+                    SELECT MAX(i2.date_visite) FROM INSPECTION i2 
+                    WHERE i2.code_batiment = i.code_batiment
+                )
+            )
+        '''
+        params.append(etat_filter)
+    
+    query += ' ORDER BY b.code_batiment DESC'
+    
+    cur.execute(query, params)
     buildings = cur.fetchall()
+    
+    # Get dropdown data for filters
+    cur.execute('SELECT id_zone, nom_zone FROM ZONE_URBAINE ORDER BY nom_zone')
+    zones = cur.fetchall()
+    
+    cur.execute('SELECT id_type, libelle_type FROM TYPE_BATIMENT ORDER BY libelle_type')
+    types = cur.fetchall()
+    
+    cur.execute('SELECT id_protection, niveau FROM NIV_PROTECTION ORDER BY niveau')
+    protections = cur.fetchall()
+    
+    # Get distinct etats from inspections
+    cur.execute('SELECT DISTINCT etat_constate FROM INSPECTION WHERE etat_constate IS NOT NULL ORDER BY etat_constate')
+    etats = cur.fetchall()
+    
     cur.close()
-    return render_template('buildings/list.html', buildings=buildings)
+    
+    return render_template('buildings/list.html', 
+                          buildings=buildings,
+                          zones=zones,
+                          types=types,
+                          protections=protections,
+                          etats=etats,
+                          # Pass current filter values back to template
+                          current_search=search,
+                          current_zone=zone_filter,
+                          current_type=type_filter,
+                          current_protection=protection_filter,
+                          current_etat=etat_filter)
 
 @buildings_bp.route('/add', methods=['GET', 'POST'])
 def add_building():

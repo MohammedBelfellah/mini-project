@@ -5,22 +5,89 @@ interventions_bp = Blueprint('interventions', __name__, url_prefix='/interventio
 
 @interventions_bp.route('/')
 def list_interventions():
-    """List all interventions."""
+    """List all interventions with search and filtering."""
     conn = get_db()
     cur = conn.cursor()
-    cur.execute('''
-        SELECT i.id_interv, i.date_debut, i.date_fin, i.type_travaux, 
+    
+    # Get filter parameters
+    search = request.args.get('search', '').strip()
+    statut_filter = request.args.get('statut', '')
+    building_filter = request.args.get('building', '')
+    prestataire_filter = request.args.get('prestataire', '')
+    validated_filter = request.args.get('validated', '')
+    
+    # Base query
+    query = '''
+        SELECT i.id_interv, i.date_debut, i.date_fin, i.type_travaux,
                i.cout_estime, i.est_validee, i.statut_travaux,
-               b.nom_batiment, b.code_batiment,
-               p.nom_entreprise
+               b.code_batiment, b.nom_batiment,
+               p.id_prestataire, p.nom_entreprise
         FROM INTERVENTION i
         JOIN BATIMENT b ON i.code_batiment = b.code_batiment
-        JOIN PRESTATAIRE p ON i.id_prestataire = p.id_prestataire
-        ORDER BY i.date_debut DESC
-    ''')
+        LEFT JOIN PRESTATAIRE p ON i.id_prestataire = p.id_prestataire
+        WHERE 1=1
+    '''
+    
+    params = []
+    
+    # Search
+    if search:
+        query += ''' AND (
+            LOWER(b.nom_batiment) LIKE LOWER(%s) OR 
+            LOWER(i.type_travaux) LIKE LOWER(%s) OR
+            LOWER(p.nom_entreprise) LIKE LOWER(%s)
+        )'''
+        search_param = f'%{search}%'
+        params.extend([search_param, search_param, search_param])
+    
+    # Statut filter
+    if statut_filter:
+        query += ' AND i.statut_travaux = %s'
+        params.append(statut_filter)
+    
+    # Building filter
+    if building_filter:
+        query += ' AND i.code_batiment = %s'
+        params.append(building_filter)
+    
+    # Prestataire filter
+    if prestataire_filter:
+        query += ' AND i.id_prestataire = %s'
+        params.append(prestataire_filter)
+    
+    # Validated filter
+    if validated_filter == 'yes':
+        query += ' AND i.est_validee = TRUE'
+    elif validated_filter == 'no':
+        query += ' AND (i.est_validee = FALSE OR i.est_validee IS NULL)'
+    
+    query += ' ORDER BY i.date_debut DESC'
+    
+    cur.execute(query, params)
     interventions = cur.fetchall()
+    
+    # Get filter dropdown data
+    cur.execute('SELECT DISTINCT statut_travaux FROM INTERVENTION WHERE statut_travaux IS NOT NULL ORDER BY statut_travaux')
+    statuts = cur.fetchall()
+    
+    cur.execute('SELECT code_batiment, nom_batiment FROM BATIMENT ORDER BY nom_batiment')
+    buildings = cur.fetchall()
+    
+    cur.execute('SELECT id_prestataire, nom_entreprise FROM PRESTATAIRE ORDER BY nom_entreprise')
+    prestataires = cur.fetchall()
+    
     cur.close()
-    return render_template('interventions/list.html', interventions=interventions)
+    
+    return render_template('interventions/list.html',
+                          interventions=interventions,
+                          statuts=statuts,
+                          buildings=buildings,
+                          prestataires=prestataires,
+                          current_search=search,
+                          current_statut=statut_filter,
+                          current_building=building_filter,
+                          current_prestataire=prestataire_filter,
+                          current_validated=validated_filter)
 
 @interventions_bp.route('/add', methods=['GET', 'POST'])
 def add_intervention():
