@@ -1,10 +1,196 @@
 {% extends "base.html" %} {% block title %}Tableau de Bord - Patrimoine Urbain{%
-endblock %} {% block content %}
+endblock %} {% block extra_css %}
+<!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<style>
+  #map {
+    height: 600px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .view-toggle-btn {
+    transition: all 0.3s ease;
+  }
+
+  .view-toggle-btn.active {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .leaflet-popup-content {
+    min-width: 220px;
+    padding: 0;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+
+  .popup-container {
+    padding: 15px;
+  }
+
+  .popup-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1a1a2e;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #3498db;
+  }
+
+  .popup-info {
+    margin: 8px 0;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .popup-info i {
+    color: #3498db;
+    width: 16px;
+  }
+
+  .popup-info strong {
+    color: #2c3e50;
+  }
+
+  .popup-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-bon {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+  }
+  .badge-moyen {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+  }
+  .badge-degrade {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+  }
+  .badge-ruine {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+  }
+  .badge-unknown {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  }
+
+  .popup-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+  }
+
+  .popup-btn:hover {
+    background: linear-gradient(135deg, #2980b9, #1a5276);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+  }
+
+  #statistics-view,
+  #map-view {
+    display: none;
+  }
+
+  #statistics-view.active,
+  #map-view.active {
+    display: block;
+  }
+
+  .building-marker {
+    background: none;
+    border: none;
+  }
+
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 12px 0;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .legend-dot.bon {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+  }
+  .legend-dot.moyen {
+    background: linear-gradient(135deg, #f39c12, #f1c40f);
+  }
+  .legend-dot.degrade {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+  }
+  .legend-dot.ruine {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+  }
+  .legend-dot.unknown {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  }
+</style>
+{% endblock %} {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1><i class="bi bi-speedometer2"></i> Tableau de Bord</h1>
+
+  <!-- View Toggle Buttons -->
+  <div class="btn-group" role="group" aria-label="Toggle view">
+    <button
+      type="button"
+      class="btn btn-primary view-toggle-btn active"
+      id="btn-statistics"
+      onclick="showView('statistics')"
+    >
+      <i class="bi bi-bar-chart-fill"></i> Statistiques
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline-primary view-toggle-btn"
+      id="btn-map"
+      onclick="showView('map')"
+    >
+      <i class="bi bi-map"></i> Carte
+    </button>
+  </div>
 </div>
 
-<!-- Statistics Cards -->
+<!-- Statistics Cards (Always Visible) -->
 <div class="row mb-4">
   <div class="col-md-4">
     <div class="card stat-card text-white bg-primary">
@@ -35,170 +221,166 @@ endblock %} {% block content %}
   </div>
 </div>
 
-<!-- Buildings by Zone -->
-<div class="row">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Bâtiments par Zone</h5>
+<!-- ==================== STATISTICS VIEW ==================== -->
+<div id="statistics-view" class="active">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Bâtiments par Zone</h5>
+        </div>
+        <div class="card-body">
+          {% if buildings_by_zone %}
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th class="text-end">Nombre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for zone, count in buildings_by_zone %}
+              <tr>
+                <td>{{ zone }}</td>
+                <td class="text-end">
+                  <span class="badge bg-primary">{{ count }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted">Aucune donnée disponible</p>
+          {% endif %}
+        </div>
       </div>
-      <div class="card-body">
-        {% if buildings_by_zone %}
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Zone</th>
-              <th class="text-end">Nombre</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for zone, count in buildings_by_zone %}
-            <tr>
-              <td>{{ zone }}</td>
-              <td class="text-end">
-                <span class="badge bg-primary">{{ count }}</span>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">Aucune donnée disponible</p>
-        {% endif %}
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-diagram-3"></i> Bâtiments par Type
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if buildings_by_type %}
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th class="text-end">Nombre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for type, count in buildings_by_type %}
+              <tr>
+                <td>{{ type }}</td>
+                <td class="text-end">
+                  <span class="badge bg-success">{{ count }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted">Aucune donnée disponible</p>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Buildings by Type -->
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header bg-success text-white">
-        <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Bâtiments par Type</h5>
-      </div>
-      <div class="card-body">
-        {% if buildings_by_type %}
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th class="text-end">Nombre</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for type, count in buildings_by_type %}
-            <tr>
-              <td>{{ type }}</td>
-              <td class="text-end">
-                <span class="badge bg-success">{{ count }}</span>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">Aucune donnée disponible</p>
-        {% endif %}
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-heart-pulse"></i> État de Conservation
+          </h5>
+        </div>
+        <div class="card-body">
+          {% if buildings_by_state %}
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>État</th>
+                <th class="text-end">Nombre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for state, count in buildings_by_state %}
+              <tr>
+                <td>
+                  {% if state == 'Bon' %}<span class="badge badge-good"
+                    >{{ state }}</span
+                  >
+                  {% elif state == 'Moyen' %}<span class="badge badge-warning"
+                    >{{ state }}</span
+                  >
+                  {% else %}<span class="badge badge-urgent">{{ state }}</span
+                  >{% endif %}
+                </td>
+                <td class="text-end"><strong>{{ count }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted">Aucune inspection disponible</p>
+          {% endif %}
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Conservation State -->
-<div class="row mt-4">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header bg-info text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-heart-pulse"></i> État de Conservation
-        </h5>
-      </div>
-      <div class="card-body">
-        {% if buildings_by_state %}
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>État</th>
-              <th class="text-end">Nombre</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for state, count in buildings_by_state %}
-            <tr>
-              <td>
-                {% if state == 'Bon' %}
-                <span class="badge badge-good">{{ state }}</span>
-                {% elif state == 'Moyen' %}
-                <span class="badge badge-warning">{{ state }}</span>
-                {% else %}
-                <span class="badge badge-urgent">{{ state }}</span>
-                {% endif %}
-              </td>
-              <td class="text-end"><strong>{{ count }}</strong></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">Aucune inspection disponible</p>
-        {% endif %}
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-warning text-white">
+          <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Coût par Année</h5>
+        </div>
+        <div class="card-body">
+          {% if cost_by_year %}
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Année</th>
+                <th class="text-end">Coût (MAD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for year, cost in cost_by_year %}
+              <tr>
+                <td>{{ year }}</td>
+                <td class="text-end">{{ "{:,.2f}".format(cost) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted">Aucune donnée disponible</p>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Cost by Year -->
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header bg-warning text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-cash-stack"></i> Coût des Restaurations par Année
-        </h5>
-      </div>
-      <div class="card-body">
-        {% if cost_by_year %}
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Année</th>
-              <th class="text-end">Coût Total (MAD)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for year, cost in cost_by_year %}
-            <tr>
-              <td>{{ year }}</td>
-              <td class="text-end">{{ "{:,.2f}".format(cost) }} MAD</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">Aucune donnée disponible</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Urgent Buildings -->
-{% if urgent_buildings %}
-<div class="row mt-4">
-  <div class="col-12">
-    <div class="card border-danger">
-      <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">
-          <i class="bi bi-exclamation-triangle"></i> Bâtiments Nécessitant une
-          Intervention Urgente
-        </h5>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
+  {% if urgent_buildings %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-exclamation-triangle"></i> Bâtiments Urgents
+          </h5>
+        </div>
+        <div class="card-body">
           <table class="table table-hover">
             <thead>
               <tr>
                 <th>Code</th>
-                <th>Nom du Bâtiment</th>
+                <th>Nom</th>
                 <th>État</th>
-                <th>Date d'Inspection</th>
+                <th>Date</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -207,21 +389,14 @@ endblock %} {% block content %}
               <tr>
                 <td><strong>{{ code }}</strong></td>
                 <td>{{ nom }}</td>
-                <td>
-                  {% if etat == 'En ruine' %}
-                  <span class="badge badge-urgent">{{ etat }}</span>
-                  {% else %}
-                  <span class="badge badge-warning">{{ etat }}</span>
-                  {% endif %}
-                </td>
-                <td>{{ date.strftime('%d/%m/%Y') if date else 'N/A' }}</td>
+                <td><span class="badge badge-urgent">{{ etat }}</span></td>
+                <td>{{ date|safe_strftime }}</td>
                 <td>
                   <a
                     href="{{ url_for('buildings.view_building', id=code) }}"
                     class="btn btn-sm btn-primary"
-                  >
-                    <i class="bi bi-eye"></i> Voir
-                  </a>
+                    ><i class="bi bi-eye"></i
+                  ></a>
                 </td>
               </tr>
               {% endfor %}
@@ -231,5 +406,201 @@ endblock %} {% block content %}
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
-{% endif %} {% endblock %}
+
+<!-- ==================== MAP VIEW ==================== -->
+<div id="map-view">
+  <div class="card">
+    <div
+      class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+    >
+      <h5 class="mb-0">
+        <i class="bi bi-map"></i> Carte des Bâtiments
+        <span class="badge bg-light text-primary ms-2"
+          >{{ map_buildings|length }} bâtiments</span
+        >
+      </h5>
+      <div class="dropdown">
+        <button
+          class="btn btn-light btn-sm dropdown-toggle"
+          type="button"
+          id="mapStyleDropdown"
+          data-bs-toggle="dropdown"
+        >
+          <i class="bi bi-palette"></i> Style
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="changeMapStyle('dark'); return false;"
+              ><i class="bi bi-moon-fill"></i> Dark Urban</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="changeMapStyle('light'); return false;"
+              ><i class="bi bi-sun-fill"></i> Light</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="changeMapStyle('satellite'); return false;"
+              ><i class="bi bi-globe"></i> Satellite</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="#"
+              onclick="changeMapStyle('streets'); return false;"
+              ><i class="bi bi-signpost-2"></i> Streets</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div id="map"></div>
+    </div>
+    <div class="card-footer">
+      <div class="map-legend">
+        <div class="legend-item">
+          <span class="legend-dot bon"></span><span>Bon</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot moyen"></span><span>Moyen</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot degrade"></span><span>Dégradé</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot ruine"></span><span>En ruine</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot unknown"></span><span>Non inspecté</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script>
+  const buildings = JSON.parse('{{ map_buildings | tojson | safe }}');
+  let map = null;
+  let currentTileLayer = null;
+
+  const mapStyles = {
+    dark: { url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attribution: '&copy; OpenStreetMap &copy; CARTO' },
+    light: { url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", attribution: '&copy; OpenStreetMap &copy; CARTO' },
+    satellite: { url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attribution: '&copy; Esri' },
+    streets: { url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", attribution: '&copy; OpenStreetMap' }
+  };
+
+  function showView(view) {
+    const statsView = document.getElementById("statistics-view");
+    const mapView = document.getElementById("map-view");
+    const btnStats = document.getElementById("btn-statistics");
+    const btnMap = document.getElementById("btn-map");
+
+    if (view === "statistics") {
+      statsView.classList.add("active");
+      mapView.classList.remove("active");
+      btnStats.classList.add("active", "btn-primary");
+      btnStats.classList.remove("btn-outline-primary");
+      btnMap.classList.remove("active", "btn-primary");
+      btnMap.classList.add("btn-outline-primary");
+    } else {
+      statsView.classList.remove("active");
+      mapView.classList.add("active");
+      btnStats.classList.remove("active", "btn-primary");
+      btnStats.classList.add("btn-outline-primary");
+      btnMap.classList.add("active", "btn-primary");
+      btnMap.classList.remove("btn-outline-primary");
+
+      if (!map) {
+        setTimeout(initMap, 100);
+      } else {
+        setTimeout(() => map.invalidateSize(), 100);
+      }
+    }
+  }
+
+  function changeMapStyle(styleName) {
+    if (!map || !mapStyles[styleName]) return;
+    if (currentTileLayer) map.removeLayer(currentTileLayer);
+    currentTileLayer = L.tileLayer(mapStyles[styleName].url, {
+      attribution: mapStyles[styleName].attribution,
+      maxZoom: 19
+    }).addTo(map);
+  }
+
+  function getMarkerColor(etat) {
+    const colors = {
+      'Bon': '#27ae60',
+      'Moyen': '#f39c12',
+      'Dégradé': '#e67e22',
+      'En ruine': '#e74c3c'
+    };
+    return colors[etat] || '#95a5a6';
+  }
+
+  function createBuildingIcon(etat) {
+    const color = getMarkerColor(etat);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+      <path fill="${color}" stroke="#fff" stroke-width="2" d="M18 0C8 0 0 8 0 18c0 14 18 26 18 26s18-12 18-26C36 8 28 0 18 0z"/>
+      <circle cx="18" cy="16" r="8" fill="#fff"/>
+      <path fill="${color}" d="M14 12h8v10h-8zM15 13h2v2h-2zM19 13h2v2h-2zM15 16h2v2h-2zM19 16h2v2h-2zM17 19h2v3h-2z"/>
+    </svg>`;
+    return L.divIcon({
+      className: 'building-marker',
+      html: svg,
+      iconSize: [36, 44],
+      iconAnchor: [18, 44],
+      popupAnchor: [0, -44]
+    });
+  }
+
+  function initMap() {
+    map = L.map('map').setView([31.7917, -7.0926], 6);
+    currentTileLayer = L.tileLayer(mapStyles.satellite.url, {
+      attribution: mapStyles.satellite.attribution,
+      maxZoom: 19
+    }).addTo(map);
+
+    const markers = [];
+    buildings.forEach(b => {
+      if (b.lat && b.lng) {
+        const popup = `
+          <div class="popup-container">
+            <div class="popup-title"><i class="bi bi-building"></i> ${b.nom}</div>
+            <div class="popup-info"><i class="bi bi-geo-alt"></i> ${b.adresse}</div>
+            <div class="popup-info"><i class="bi bi-map"></i> ${b.zone}</div>
+            <div class="popup-info"><i class="bi bi-house"></i> ${b.type}</div>
+            <div class="popup-info"><i class="bi bi-heart-pulse"></i> <span class="popup-badge badge-${b.etat === 'Bon' ? 'bon' : b.etat === 'Moyen' ? 'moyen' : b.etat === 'Dégradé' ? 'degrade' : b.etat === 'En ruine' ? 'ruine' : 'unknown'}">${b.etat}</span></div>
+            <a href="/buildings/view/${b.code}" class="popup-btn"><i class="bi bi-eye"></i> Voir détails</a>
+          </div>`;
+        const marker = L.marker([b.lat, b.lng], { icon: createBuildingIcon(b.etat) }).bindPopup(popup);
+        markers.push(marker);
+        marker.addTo(map);
+      }
+    });
+
+    if (markers.length > 0) {
+      map.fitBounds(L.featureGroup(markers).getBounds().pad(0.1));
+    }
+  }
+</script>
+{% endblock %}

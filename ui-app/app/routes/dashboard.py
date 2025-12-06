@@ -5,7 +5,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/')
 def index():
-    """Dashboard with statistics."""
+    """Dashboard with statistics and map."""
     conn = get_db()
     cur = conn.cursor()
     
@@ -48,8 +48,7 @@ def index():
     ''')
     buildings_by_state = cur.fetchall()
     
-    # Buildings needing urgent intervention (En ruine or Dégradé)
-    # FIXED: Removed DISTINCT and added etat_constate to SELECT
+    # Buildings needing urgent intervention
     cur.execute('''
         SELECT b.code_batiment, b.nom_batiment, i.etat_constate, i.date_visite
         FROM BATIMENT b
@@ -89,6 +88,39 @@ def index():
     cur.execute('SELECT COUNT(*) FROM INSPECTION')
     total_inspections = cur.fetchone()[0]
     
+    # ========== NEW: Buildings for Map ==========
+    cur.execute('''
+        SELECT b.code_batiment, b.nom_batiment, b.adresse_rue, 
+               b.latitude, b.longitude,
+               z.nom_zone, t.libelle_type, n.niveau,
+               (SELECT i.etat_constate 
+                FROM INSPECTION i 
+                WHERE i.code_batiment = b.code_batiment 
+                ORDER BY i.date_visite DESC 
+                LIMIT 1) as dernier_etat
+        FROM BATIMENT b
+        LEFT JOIN ZONE_URBAINE z ON b.id_zone = z.id_zone
+        LEFT JOIN TYPE_BATIMENT t ON b.id_type = t.id_type
+        LEFT JOIN NIV_PROTECTION n ON b.id_protection = n.id_protection
+        WHERE b.latitude IS NOT NULL AND b.longitude IS NOT NULL
+    ''')
+    buildings_for_map = cur.fetchall()
+    
+    # Convert to list of dictionaries for JSON
+    map_buildings = []
+    for b in buildings_for_map:
+        map_buildings.append({
+            'code': b[0],
+            'nom': b[1],
+            'adresse': b[2] or 'N/A',
+            'lat': float(b[3]) if b[3] else None,
+            'lng': float(b[4]) if b[4] else None,
+            'zone': b[5] or 'N/A',
+            'type': b[6] or 'N/A',
+            'protection': b[7] or 'N/A',
+            'etat': b[8] or 'Non inspecté'
+        })
+    
     cur.close()
     
     return render_template('dashboard/index.html',
@@ -99,4 +131,5 @@ def index():
                           buildings_by_type=buildings_by_type,
                           buildings_by_state=buildings_by_state,
                           urgent_buildings=urgent_buildings,
-                          cost_by_year=cost_by_year)
+                          cost_by_year=cost_by_year,
+                          map_buildings=map_buildings)
