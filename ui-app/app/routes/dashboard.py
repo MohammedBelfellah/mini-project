@@ -1,0 +1,102 @@
+from flask import Blueprint, render_template
+from app.db import get_db
+
+dashboard_bp = Blueprint('dashboard', __name__)
+
+@dashboard_bp.route('/')
+def index():
+    """Dashboard with statistics."""
+    conn = get_db()
+    cur = conn.cursor()
+    
+    # Total buildings count
+    cur.execute('SELECT COUNT(*) FROM BATIMENT')
+    total_buildings = cur.fetchone()[0]
+    
+    # Buildings by zone
+    cur.execute('''
+        SELECT z.nom_zone, COUNT(b.code_batiment)
+        FROM ZONE_URBAINE z
+        LEFT JOIN BATIMENT b ON z.id_zone = b.id_zone
+        GROUP BY z.id_zone, z.nom_zone
+        ORDER BY COUNT(b.code_batiment) DESC
+    ''')
+    buildings_by_zone = cur.fetchall()
+    
+    # Buildings by type
+    cur.execute('''
+        SELECT t.libelle_type, COUNT(b.code_batiment)
+        FROM TYPE_BATIMENT t
+        LEFT JOIN BATIMENT b ON t.id_type = b.id_type
+        GROUP BY t.id_type, t.libelle_type
+        ORDER BY COUNT(b.code_batiment) DESC
+    ''')
+    buildings_by_type = cur.fetchall()
+    
+    # Buildings by conservation state (latest inspection)
+    cur.execute('''
+        SELECT i.etat_constate, COUNT(DISTINCT i.code_batiment)
+        FROM INSPECTION i
+        INNER JOIN (
+            SELECT code_batiment, MAX(date_visite) as max_date
+            FROM INSPECTION
+            GROUP BY code_batiment
+        ) latest ON i.code_batiment = latest.code_batiment 
+                 AND i.date_visite = latest.max_date
+        GROUP BY i.etat_constate
+        ORDER BY i.etat_constate
+    ''')
+    buildings_by_state = cur.fetchall()
+    
+    # Buildings needing urgent intervention (En ruine or Dégradé)
+    # FIXED: Removed DISTINCT and added etat_constate to SELECT
+    cur.execute('''
+        SELECT b.code_batiment, b.nom_batiment, i.etat_constate, i.date_visite
+        FROM BATIMENT b
+        INNER JOIN INSPECTION i ON b.code_batiment = i.code_batiment
+        INNER JOIN (
+            SELECT code_batiment, MAX(date_visite) as max_date
+            FROM INSPECTION
+            GROUP BY code_batiment
+        ) latest ON i.code_batiment = latest.code_batiment 
+                 AND i.date_visite = latest.max_date
+        WHERE i.etat_constate IN ('En ruine', 'Dégradé')
+        ORDER BY 
+            CASE i.etat_constate 
+                WHEN 'En ruine' THEN 1 
+                WHEN 'Dégradé' THEN 2 
+            END,
+            b.nom_batiment
+    ''')
+    urgent_buildings = cur.fetchall()
+    
+    # Total restoration cost by year
+    cur.execute('''
+        SELECT EXTRACT(YEAR FROM date_debut)::INTEGER as year, 
+               COALESCE(SUM(cout_estime), 0) as total_cost
+        FROM INTERVENTION
+        WHERE date_debut IS NOT NULL
+        GROUP BY EXTRACT(YEAR FROM date_debut)
+        ORDER BY year DESC
+    ''')
+    cost_by_year = cur.fetchall()
+    
+    # Recent interventions count
+    cur.execute('SELECT COUNT(*) FROM INTERVENTION')
+    total_interventions = cur.fetchone()[0]
+    
+    # Recent inspections count
+    cur.execute('SELECT COUNT(*) FROM INSPECTION')
+    total_inspections = cur.fetchone()[0]
+    
+    cur.close()
+    
+    return render_template('dashboard/index.html',
+                          total_buildings=total_buildings,
+                          total_interventions=total_interventions,
+                          total_inspections=total_inspections,
+                          buildings_by_zone=buildings_by_zone,
+                          buildings_by_type=buildings_by_type,
+                          buildings_by_state=buildings_by_state,
+                          urgent_buildings=urgent_buildings,
+                          cost_by_year=cost_by_year)

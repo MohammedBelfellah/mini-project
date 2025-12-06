@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}{{ building[1] }} - Détails{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-building"></i> {{ building[1] }}</h1>
+    <div>
+        <a href="{{ url_for('buildings.edit_building', id=building[0]) }}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Modifier
+        </a>
+        <a href="{{ url_for('buildings.list_buildings') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<!-- Building Info Card -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informations Générales</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Code:</strong> {{ building[0] }}</p>
+                <p><strong>Nom:</strong> {{ building[1] }}</p>
+                <p><strong>Adresse:</strong> {{ building[2] or 'N/A' }}</p>
+                <p><strong>Zone:</strong> <span class="badge bg-info">{{ building[7] or 'N/A' }}</span></p>
+                <p><strong>Type:</strong> {{ building[8] or 'N/A' }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Protection:</strong> {{ building[9] or 'N/A' }}</p>
+                <p><strong>Propriétaire:</strong> {{ building[10] }} ({{ building[11] or 'N/A' }})</p>
+                <p><strong>Date de Construction:</strong> {{ building[5].strftime('%d/%m/%Y') if building[5] else 'N/A' }}</p>
+                <p><strong>Coordonnées:</strong> 
+                    {% if building[3] and building[4] %}
+                        {{ building[3] }}, {{ building[4] }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% if building[6] %}
+        <hr>
+        <p><strong>Note Historique:</strong></p>
+        <p class="text-muted">{{ building[6] }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Inspections -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Inspections ({{ inspections|length }})</h5>
+        <a href="{{ url_for('inspections.add_inspection') }}" class="btn btn-sm btn-light">
+            <i class="bi bi-plus"></i> Ajouter
+        </a>
+    </div>
+    <div class="card-body">
+        {% if inspections %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>État Constaté</th>
+                        <th>Rapport</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inspection in inspections %}
+                    <tr>
+                        <td>{{ inspection[1].strftime('%d/%m/%Y') if inspection[1] else 'N/A' }}</td>
+                        <td>
+                            {% if inspection[2] == 'Bon' %}
+                                <span class="badge badge-good">{{ inspection[2] }}</span>
+                            {% elif inspection[2] == 'Moyen' %}
+                                <span class="badge badge-warning">{{ inspection[2] }}</span>
+                            {% else %}
+                                <span class="badge badge-urgent">{{ inspection[2] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ (inspection[3][:50] + '...') if inspection[3] and inspection[3]|length > 50 else (inspection[3] or 'N/A') }}</td>
+                        <td>
+                            <a href="{{ url_for('inspections.view_inspection', id=inspection[0]) }}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Aucune inspection enregistrée</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Interventions -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-tools"></i> Interventions ({{ interventions|length }})</h5>
+        <a href="{{ url_for('interventions.add_intervention') }}" class="btn btn-sm btn-light">
+            <i class="bi bi-plus"></i> Ajouter
+        </a>
+    </div>
+    <div class="card-body">
+        {% if interventions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date Début</th>
+                        <th>Type de Travaux</th>
+                        <th>Coût</th>
+                        <th>Prestataire</th>
+                        <th>Statut</th>
+                        <th>Validée</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for intervention in interventions %}
+                    <tr>
+                        <td>{{ intervention[1].strftime('%d/%m/%Y') if intervention[1] else 'N/A' }}</td>
+                        <td>{{ intervention[3] or 'N/A' }}</td>
+                        <td>{{ "{:,.2f}".format(intervention[4]) if intervention[4] else 'N/A' }} MAD</td>
+                        <td>{{ intervention[7] or 'N/A' }}</td>
+                        <td><span class="badge bg-info">{{ intervention[6] or 'N/A' }}</span></td>
+                        <td>
+                            {% if intervention[5] %}
+                                <span class="badge bg-success">Oui</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Non</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('interventions.view_intervention', id=intervention[0]) }}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">Aucune intervention enregistrée</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Documents -->
+{% if documents %}
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-file-earmark-image"></i> Documents & Médias ({{ documents|length }})</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for doc in documents %}
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-file-earmark-text" style="font-size: 3rem;"></i>
+                        <p class="mt-2 mb-0"><strong>{{ doc[1] }}</strong></p>
+                        <small class="text-muted">{{ doc[2] }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %} {% block title %}Tableau de Bord - Patrimoine Urbain{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-speedometer2"></i> Tableau de Bord</h1>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card text-white bg-primary">
+      <div class="card-body">
+        <i class="bi bi-buildings text-white"></i>
+        <h3>{{ total_buildings }}</h3>
+        <p class="mb-0">Bâtiments Recensés</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card text-white bg-success">
+      <div class="card-body">
+        <i class="bi bi-clipboard-check text-white"></i>
+        <h3>{{ total_inspections }}</h3>
+        <p class="mb-0">Inspections Réalisées</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card text-white bg-warning">
+      <div class="card-body">
+        <i class="bi bi-tools text-white"></i>
+        <h3>{{ total_interventions }}</h3>
+        <p class="mb-0">Interventions</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Buildings by Zone -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Bâtiments par Zone</h5>
+      </div>
+      <div class="card-body">
+        {% if buildings_by_zone %}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th class="text-end">Nombre</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for zone, count in buildings_by_zone %}
+            <tr>
+              <td>{{ zone }}</td>
+              <td class="text-end">
+                <span class="badge bg-primary">{{ count }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Aucune donnée disponible</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Buildings by Type -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-diagram-3"></i> Bâtiments par Type</h5>
+      </div>
+      <div class="card-body">
+        {% if buildings_by_type %}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th class="text-end">Nombre</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for type, count in buildings_by_type %}
+            <tr>
+              <td>{{ type }}</td>
+              <td class="text-end">
+                <span class="badge bg-success">{{ count }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Aucune donnée disponible</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Conservation State -->
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-heart-pulse"></i> État de Conservation
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if buildings_by_state %}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>État</th>
+              <th class="text-end">Nombre</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for state, count in buildings_by_state %}
+            <tr>
+              <td>
+                {% if state == 'Bon' %}
+                <span class="badge badge-good">{{ state }}</span>
+                {% elif state == 'Moyen' %}
+                <span class="badge badge-warning">{{ state }}</span>
+                {% else %}
+                <span class="badge badge-urgent">{{ state }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end"><strong>{{ count }}</strong></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Aucune inspection disponible</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost by Year -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-warning text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-cash-stack"></i> Coût des Restaurations par Année
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if cost_by_year %}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Année</th>
+              <th class="text-end">Coût Total (MAD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for year, cost in cost_by_year %}
+            <tr>
+              <td>{{ year }}</td>
+              <td class="text-end">{{ "{:,.2f}".format(cost) }} MAD</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">Aucune donnée disponible</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Urgent Buildings -->
+{% if urgent_buildings %}
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card border-danger">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-exclamation-triangle"></i> Bâtiments Nécessitant une
+          Intervention Urgente
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Nom du Bâtiment</th>
+                <th>État</th>
+                <th>Date d'Inspection</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for code, nom, etat, date in urgent_buildings %}
+              <tr>
+                <td><strong>{{ code }}</strong></td>
+                <td>{{ nom }}</td>
+                <td>
+                  {% if etat == 'En ruine' %}
+                  <span class="badge badge-urgent">{{ etat }}</span>
+                  {% else %}
+                  <span class="badge badge-warning">{{ etat }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ date.strftime('%d/%m/%Y') if date else 'N/A' }}</td>
+                <td>
+                  <a
+                    href="{{ url_for('buildings.view_building', id=code) }}"
+                    class="btn btn-sm btn-primary"
+                  >
+                    <i class="bi bi-eye"></i> Voir
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endblock %}
