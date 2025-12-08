@@ -1,0 +1,81 @@
+{% extends "base.html" %} {% block title %}Modifier le Prestataire{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-pencil"></i> Modifier le Prestataire</h1>
+  <a
+    href="{{ url_for('prestataires.view_prestataire', id=prestataire[0]) }}"
+    class="btn btn-secondary"
+  >
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form
+      method="POST"
+      action="{{ url_for('prestataires.edit_prestataire', id=prestataire[0]) }}"
+    >
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nom_entreprise" class="form-label">
+            Nom de l'Entreprise <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="nom_entreprise"
+            name="nom_entreprise"
+            value="{{ prestataire[1] }}"
+            required
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="role_prest" class="form-label">Rôle / Spécialité</label>
+          <input
+            type="text"
+            class="form-control"
+            id="role_prest"
+            name="role_prest"
+            list="roles_list"
+            value="{{ prestataire[2] or '' }}"
+            placeholder="Ex: Architecte, Entreprise BTP..."
+          />
+          <datalist id="roles_list">
+            {% for role in existing_roles %}
+            <option value="{{ role }}"></option>
+            {% endfor %}
+            <option value="Architecte"></option>
+            <option value="Entreprise BTP"></option>
+            <option value="Bureau d'Études"></option>
+            <option value="Artisan"></option>
+            <option value="Restaurateur"></option>
+            <option value="Ingénieur"></option>
+            <option value="Consultant"></option>
+            <option value="Artisanat d'Art"></option>
+            <option value="Spécialiste Pisé/Terre"></option>
+            <option value="Gros Oeuvre"></option>
+          </datalist>
+
+          <div class="form-text">
+            Sélectionnez un rôle existant ou saisissez-en un nouveau
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a
+          href="{{ url_for('prestataires.view_prestataire', id=prestataire[0]) }}"
+          class="btn btn-secondary"
+        >
+          <i class="bi bi-x-circle"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-warning">
+          <i class="bi bi-check-circle"></i> Mettre à Jour
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

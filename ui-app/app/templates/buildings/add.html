@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter un Bâtiment{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-plus-circle"></i> Ajouter un Bâtiment</h1>
+    <a href="{{ url_for('buildings.list_buildings') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('buildings.add_building') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nom_batiment" class="form-label">Nom du Bâtiment <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nom_batiment" name="nom_batiment" required>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="adresse_rue" class="form-label">Adresse</label>
+                    <input type="text" class="form-control" id="adresse_rue" name="adresse_rue">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="number" step="0.000001" class="form-control" id="latitude" name="latitude" placeholder="Ex: 35.7595">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="number" step="0.000001" class="form-control" id="longitude" name="longitude" placeholder="Ex: -5.8340">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="date_construction" class="form-label">Date de Construction</label>
+                    <input type="date" class="form-control" id="date_construction" name="date_construction">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="id_zone" class="form-label">Zone Urbaine</label>
+                    <select class="form-select" id="id_zone" name="id_zone">
+                        <option value="">-- Sélectionner --</option>
+                        {% for zone in zones %}
+                        <option value="{{ zone[0] }}">{{ zone[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_type" class="form-label">Type de Bâtiment</label>
+                    <select class="form-select" id="id_type" name="id_type">
+                        <option value="">-- Sélectionner --</option>
+                        {% for type in types %}
+                        <option value="{{ type[0] }}">{{ type[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="id_protection" class="form-label">Niveau de Protection</label>
+                    <select class="form-select" id="id_protection" name="id_protection">
+                        <option value="">-- Sélectionner --</option>
+                        {% for protection in protections %}
+                        <option value="{{ protection[0] }}">{{ protection[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="id_proprio" class="form-label">Propriétaire</label>
+                    <select class="form-select" id="id_proprio" name="id_proprio">
+                        <option value="">-- Sélectionner --</option>
+                        {% for proprio in proprietaires %}
+                        <option value="{{ proprio[0] }}">{{ proprio[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="note_historique" class="form-label">Note Historique</label>
+                <textarea class="form-control" id="note_historique" name="note_historique" rows="4"></textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('buildings.list_buildings') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %} {% block title %}Modifier la Zone{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-pencil"></i> Modifier la Zone</h1>
+  <a
+    href="{{ url_for('zones.view_zone', id=zone[0]) }}"
+    class="btn btn-secondary"
+  >
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('zones.edit_zone', id=zone[0]) }}">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nom_zone" class="form-label">
+            Nom de la Zone <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="nom_zone"
+            name="nom_zone"
+            value="{{ zone[1] }}"
+            required
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="type_zone" class="form-label">Type de Zone</label>
+          <input
+            type="text"
+            class="form-control"
+            id="type_zone"
+            name="type_zone"
+            list="types_list"
+            value="{{ zone[2] or '' }}"
+            placeholder="Ex: Quartier, Secteur..."
+          />
+          <datalist id="types_list">
+            {% for type in existing_types %}
+            <option value="{{ type }}"></option>
+            {% endfor %}
+            <option value="Quartier"></option>
+            <option value="Secteur"></option>
+            <option value="Arrondissement"></option>
+            <option value="Zone Historique"></option>
+            <option value="Zone Industrielle"></option>
+            <option value="Zone Résidentielle"></option>
+            <option value="Centre-Ville"></option>
+            <option value="Périphérie"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a
+          href="{{ url_for('zones.view_zone', id=zone[0]) }}"
+          class="btn btn-secondary"
+        >
+          <i class="bi bi-x-circle"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-warning">
+          <i class="bi bi-check-circle"></i> Mettre à Jour
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

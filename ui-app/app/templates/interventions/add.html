@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter une Intervention{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-plus-circle"></i> Ajouter une Intervention</h1>
+    <a href="{{ url_for('interventions.list_interventions') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('interventions.add_intervention') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="code_batiment" class="form-label">Bâtiment <span class="text-danger">*</span></label>
+                    <select class="form-select" id="code_batiment" name="code_batiment" required>
+                        <option value="">-- Sélectionner un bâtiment --</option>
+                        {% for building in buildings %}
+                        <option value="{{ building[0] }}">{{ building[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="id_prestataire" class="form-label">Prestataire <span class="text-danger">*</span></label>
+                    <select class="form-select" id="id_prestataire" name="id_prestataire" required>
+                        <option value="">-- Sélectionner un prestataire --</option>
+                        {% for prestataire in prestataires %}
+                        <option value="{{ prestataire[0] }}">{{ prestataire[1] }} ({{ prestataire[2] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="date_debut" class="form-label">Date de Début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="date_fin" class="form-label">Date de Fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cout_estime" class="form-label">Coût Estimé (MAD)</label>
+                    <input type="number" step="0.01" class="form-control" id="cout_estime" name="cout_estime" placeholder="Ex: 50000">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="statut_travaux" class="form-label">Statut des Travaux</label>
+                    <select class="form-select" id="statut_travaux" name="statut_travaux">
+                        {% for statut in statuts %}
+                        <option value="{{ statut }}" {% if statut == 'Planifié' %}selected{% endif %}>{{ statut }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="type_travaux" class="form-label">Type de Travaux</label>
+                <textarea class="form-control" id="type_travaux" name="type_travaux" rows="4" placeholder="Description des travaux à réaliser..."></textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('interventions.list_interventions') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-check-circle"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

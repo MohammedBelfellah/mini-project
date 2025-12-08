@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Gestion du Patrimoine Urbain{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--secondary-color) 100%
+        );
+        padding: 0.25rem 1rem;
+      }
+
+      .navbar-brand svg {
+        height: 40px;
+        width: auto;
+      }
+
+      .sidebar {
+        min-height: calc(100vh - 56px);
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+      }
+
+      .sidebar .nav-link {
+        color: #495057;
+        padding: 12px 20px;
+        transition: all 0.3s;
+      }
+
+      .sidebar .nav-link:hover,
+      .sidebar .nav-link.active {
+        background-color: var(--secondary-color);
+        color: white;
+        border-radius: 5px;
+      }
+
+      .sidebar .nav-link i {
+        margin-right: 10px;
+        width: 20px;
+      }
+
+      .sidebar .nav-header {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        padding: 15px 20px 5px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 30px;
+        background-color: #f5f6fa;
+      }
+
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        text-align: center;
+        padding: 20px;
+      }
+
+      .stat-card i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      .stat-card h3 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .badge-urgent {
+        background-color: #e74c3c;
+      }
+
+      .badge-warning {
+        background-color: #f39c12;
+      }
+
+      .badge-good {
+        background-color: #27ae60;
+      }
+
+      footer {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px 0;
+        margin-top: auto;
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand d-flex align-items-center"
+          href="{{ url_for('dashboard.index') }}"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="200"
+            height="50"
+            viewBox="0 0 300 80"
+          >
+            <rect width="300" height="80" rx="10" fill="none" />
+            <!-- icône: silhouette de bâtiment -->
+            <g transform="translate(12,12)" fill="#ff998b">
+              <rect x="0" y="8" width="16" height="40" rx="2" />
+              <rect x="20" y="0" width="12" height="48" rx="2" />
+              <rect x="36" y="18" width="10" height="30" rx="2" />
+              <rect x="50" y="26" width="6" height="22" rx="2" />
+            </g>
+            <!-- texte -->
+            <text
+              x="90"
+              y="48"
+              font-family="Helvetica, Arial, sans-serif"
+              font-size="20"
+              fill="white"
+              font-weight="600"
+            >
+              Patrimoine Urbain
+            </text>
+            <text
+              x="90"
+              y="64"
+              font-family="Helvetica, Arial, sans-serif"
+              font-size="11"
+              fill="#ffccb8"
+            >
+              Système de Gestion
+            </text>
+          </svg>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('dashboard.index') }}">
+                <i class="bi bi-speedometer2"></i> Tableau de Bord
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-md-block sidebar">
+          <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'dashboard' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('dashboard.index') }}"
+                >
+                  <i class="bi bi-speedometer2"></i> Tableau de Bord
+                </a>
+              </li>
+
+              <!-- Main Data -->
+              <li class="nav-header">Données Principales</li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'buildings' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('buildings.list_buildings') }}"
+                >
+                  <i class="bi bi-buildings"></i> Bâtiments
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'inspections' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('inspections.list_inspections') }}"
+                >
+                  <i class="bi bi-clipboard-check"></i> Inspections
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'interventions' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('interventions.list_interventions') }}"
+                >
+                  <i class="bi bi-tools"></i> Interventions
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'documents' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('documents.list_all_documents') }}"
+                >
+                  <i class="bi bi-file-earmark-image"></i> Documents
+                </a>
+              </li>
+
+              <!-- Reference Data -->
+              <li class="nav-header">Données de Référence</li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'zones' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('zones.list_zones') }}"
+                >
+                  <i class="bi bi-geo-alt"></i> Zones
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'types' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('types.list_types') }}"
+                >
+                  <i class="bi bi-house-door"></i> Types
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'protections' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('protections.list_protections') }}"
+                >
+                  <i class="bi bi-shield-check"></i> Protections
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'proprietaires' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('proprietaires.list_proprietaires') }}"
+                >
+                  <i class="bi bi-person-badge"></i> Propriétaires
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  class="nav-link {% if request.endpoint and 'prestataires' in request.endpoint %}active{% endif %}"
+                  href="{{ url_for('prestataires.list_prestataires') }}"
+                >
+                  <i class="bi bi-people"></i> Prestataires
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto main-content">
+          <!-- Flash Messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show"
+            role="alert"
+          >
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock
+          %}
+        </main>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center">
+      <div class="container">
+        <p class="mb-0">
+          &copy; 2025 Système de Gestion du Patrimoine Urbain - Université
+          Abdelmalek Essaâdi
+        </p>
+      </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

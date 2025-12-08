@@ -1,0 +1,191 @@
+{% extends "base.html" %} {% block title %}{{ document[1] }} - Document{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-file-earmark"></i> {{ document[1] }}</h1>
+  <div>
+    <a
+      href="{{ url_for('documents.edit_document', id=document[0]) }}"
+      class="btn btn-warning"
+    >
+      <i class="bi bi-pencil"></i> Modifier
+    </a>
+    <a
+      href="{{ url_for('buildings.view_building', id=document[4]) }}"
+      class="btn btn-secondary"
+    >
+      <i class="bi bi-arrow-left"></i> Retour au Bâtiment
+    </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <!-- Document Info Card -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="bi bi-info-circle"></i> Informations du Document
+        </h5>
+      </div>
+      <div class="card-body">
+        <p><strong>ID:</strong> {{ document[0] }}</p>
+        <p><strong>Titre:</strong> {{ document[1] }}</p>
+        <p>
+          <strong>Type:</strong>
+          {% if document[2] == 'Photo' %}
+          <span class="badge bg-success fs-6"
+            ><i class="bi bi-image"></i> {{ document[2] }}</span
+          >
+          {% elif document[2] == 'Plan' %}
+          <span class="badge bg-primary fs-6"
+            ><i class="bi bi-map"></i> {{ document[2] }}</span
+          >
+          {% elif document[2] == 'PDF' %}
+          <span class="badge bg-danger fs-6"
+            ><i class="bi bi-file-pdf"></i> {{ document[2] }}</span
+          >
+          {% elif document[2] == 'Vidéo' %}
+          <span class="badge bg-warning fs-6"
+            ><i class="bi bi-camera-video"></i> {{ document[2] }}</span
+          >
+          {% else %}
+          <span class="badge bg-secondary fs-6"
+            ><i class="bi bi-file-earmark"></i> {{ document[2] }}</span
+          >
+          {% endif %}
+        </p>
+        <p>
+          <strong>Bâtiment:</strong>
+          <a href="{{ url_for('buildings.view_building', id=document[4]) }}">
+            {{ building_name }}
+          </a>
+        </p>
+        <hr />
+        <p><strong>URL:</strong></p>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control"
+            value="{{ document[3] }}"
+            readonly
+            id="urlInput"
+          />
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            onclick="copyUrl()"
+          >
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <!-- Preview Card -->
+    <div class="card mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0"><i class="bi bi-eye"></i> Aperçu / Accès</h5>
+      </div>
+      <div class="card-body text-center">
+        {% if document[2] == 'Photo' %}
+        <img
+          src="{{ document[3] }}"
+          alt="{{ document[1] }}"
+          class="img-fluid rounded mb-3"
+          style="max-height: 300px"
+          onerror="this.style.display='none'; document.getElementById('imgError').style.display='block';"
+        />
+        <div id="imgError" style="display: none">
+          <i class="bi bi-image text-muted" style="font-size: 5rem"></i>
+          <p class="text-muted">Impossible de charger l'image</p>
+        </div>
+        {% elif document[2] == 'Vidéo' %}
+        <i class="bi bi-play-circle text-warning" style="font-size: 5rem"></i>
+        <p class="text-muted">Fichier vidéo</p>
+        {% elif document[2] == 'PDF' %}
+        <i class="bi bi-file-pdf text-danger" style="font-size: 5rem"></i>
+        <p class="text-muted">Document PDF</p>
+        {% elif document[2] == 'Plan' %}
+        <i class="bi bi-map text-primary" style="font-size: 5rem"></i>
+        <p class="text-muted">Plan architectural</p>
+        {% else %}
+        <i
+          class="bi bi-file-earmark text-secondary"
+          style="font-size: 5rem"
+        ></i>
+        <p class="text-muted">Fichier</p>
+        {% endif %}
+
+        <a
+          href="{{ document[3] }}"
+          target="_blank"
+          class="btn btn-primary btn-lg mt-3"
+        >
+          <i class="bi bi-box-arrow-up-right"></i> Ouvrir le fichier
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Button -->
+<div class="mt-4">
+  <button
+    type="button"
+    class="btn btn-danger"
+    data-bs-toggle="modal"
+    data-bs-target="#deleteModal"
+  >
+    <i class="bi bi-trash"></i> Supprimer ce document
+  </button>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle"></i> Confirmer la suppression
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Êtes-vous sûr de vouloir supprimer le document
+          <strong>{{ document[1] }}</strong>?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Annuler
+        </button>
+        <form
+          action="{{ url_for('documents.delete_document', id=document[0]) }}"
+          method="POST"
+          style="display: inline"
+        >
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Supprimer
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  function copyUrl() {
+    const urlInput = document.getElementById("urlInput");
+    urlInput.select();
+    document.execCommand("copy");
+    alert("URL copiée!");
+  }
+</script>
+{% endblock %}

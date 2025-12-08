@@ -1,0 +1,153 @@
+{% extends "base.html" %} {% block title %}{{ zone[1] }} - Détails{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-geo-alt-fill"></i> {{ zone[1] }}</h1>
+  <div>
+    <a
+      href="{{ url_for('zones.edit_zone', id=zone[0]) }}"
+      class="btn btn-warning"
+    >
+      <i class="bi bi-pencil"></i> Modifier
+    </a>
+    <a href="{{ url_for('zones.list_zones') }}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+</div>
+
+<!-- Zone Info Card -->
+<div class="card mb-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">
+      <i class="bi bi-info-circle"></i> Informations de la Zone
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>ID:</strong> {{ zone[0] }}</p>
+        <p><strong>Nom de la Zone:</strong> {{ zone[1] }}</p>
+        <p>
+          <strong>Type:</strong>
+          {% if zone[2] %}
+          <span class="badge bg-secondary fs-6">{{ zone[2] }}</span>
+          {% else %}
+          <span class="text-muted">Non spécifié</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="col-md-6">
+        <!-- Statistics -->
+        <div class="row text-center">
+          <div class="col-6 col-md-3 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-primary mb-0">{{ stats[0] }}</h3>
+              <small class="text-muted">Total</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-success mb-0">{{ stats[1] }}</h3>
+              <small class="text-muted">Bon</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-warning mb-0">{{ stats[2] }}</h3>
+              <small class="text-muted">Moyen</small>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="border rounded p-3">
+              <h3 class="text-danger mb-0">{{ stats[3] }}</h3>
+              <small class="text-muted">Urgent</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Buildings in this zone -->
+<div class="card">
+  <div
+    class="card-header bg-info text-white d-flex justify-content-between align-items-center"
+  >
+    <h5 class="mb-0">
+      <i class="bi bi-buildings"></i> Bâtiments dans cette Zone ({{
+      buildings|length }})
+    </h5>
+    <a
+      href="{{ url_for('buildings.add_building') }}"
+      class="btn btn-sm btn-light"
+    >
+      <i class="bi bi-plus"></i> Ajouter un Bâtiment
+    </a>
+  </div>
+  <div class="card-body">
+    {% if buildings %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Adresse</th>
+            <th>Type</th>
+            <th>Protection</th>
+            <th>État</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in buildings %}
+          <tr>
+            <td><strong>{{ b[0] }}</strong></td>
+            <td>{{ b[1] }}</td>
+            <td>{{ b[2] or '-' }}</td>
+            <td>{{ b[3] or '-' }}</td>
+            <td>
+              {% if b[4] %}
+              <span class="badge bg-info">{{ b[4] }}</span>
+              {% else %}
+              <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if b[5] == 'Bon' %}
+              <span class="badge bg-success">{{ b[5] }}</span>
+              {% elif b[5] == 'Moyen' %}
+              <span class="badge bg-warning text-dark">{{ b[5] }}</span>
+              {% elif b[5] == 'Dégradé' %}
+              <span class="badge" style="background-color: #e67e22"
+                >{{ b[5] }}</span
+              >
+              {% elif b[5] == 'En ruine' %}
+              <span class="badge bg-danger">{{ b[5] }}</span>
+              {% else %}
+              <span class="badge bg-secondary">Non inspecté</span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{{ url_for('buildings.view_building', id=b[0]) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                <i class="bi bi-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center py-4">
+      <i class="bi bi-inbox" style="font-size: 2rem"></i><br />
+      Aucun bâtiment enregistré dans cette zone.
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

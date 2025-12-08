@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Bâtiments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-buildings"></i> Liste des Bâtiments</h1>
+    <a href="{{ url_for('buildings.add_building') }}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Ajouter un Bâtiment
+    </a>
+</div>
+
+<!-- Search and Filter Card -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Recherche et Filtres</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('buildings.list_buildings') }}" id="filterForm">
+            <div class="row g-3">
+                <!-- Search Box -->
+                <div class="col-md-6 col-lg-4">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search"></i> Recherche
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Nom, adresse, code..." 
+                           value="{{ current_search }}">
+                </div>
+                
+                <!-- Zone Filter -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="zone" class="form-label">
+                        <i class="bi bi-geo-alt"></i> Zone
+                    </label>
+                    <select class="form-select" id="zone" name="zone">
+                        <option value="">Toutes les zones</option>
+                        {% for z in zones %}
+                        <option value="{{ z[0] }}" {% if current_zone|string == z[0]|string %}selected{% endif %}>
+                            {{ z[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Type Filter -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="type" class="form-label">
+                        <i class="bi bi-house"></i> Type
+                    </label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">Tous les types</option>
+                        {% for t in types %}
+                        <option value="{{ t[0] }}" {% if current_type|string == t[0]|string %}selected{% endif %}>
+                            {{ t[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Protection Filter -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="protection" class="form-label">
+                        <i class="bi bi-shield-check"></i> Protection
+                    </label>
+                    <select class="form-select" id="protection" name="protection">
+                        <option value="">Tous les niveaux</option>
+                        {% for p in protections %}
+                        <option value="{{ p[0] }}" {% if current_protection|string == p[0]|string %}selected{% endif %}>
+                            {{ p[1] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- État Filter -->
+                <div class="col-md-6 col-lg-2">
+                    <label for="etat" class="form-label">
+                        <i class="bi bi-heart-pulse"></i> État
+                    </label>
+                    <select class="form-select" id="etat" name="etat">
+                        <option value="">Tous les états</option>
+                        {% for e in etats %}
+                        <option value="{{ e[0] }}" {% if current_etat == e[0] %}selected{% endif %}>
+                            {{ e[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div class="row mt-3">
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Appliquer les filtres
+                    </button>
+                    <a href="{{ url_for('buildings.list_buildings') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Réinitialiser
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Summary -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted">
+        <i class="bi bi-building"></i> {{ buildings|length }} bâtiment(s) trouvé(s)
+        {% if current_search or current_zone or current_type or current_protection or current_etat %}
+        <span class="badge bg-info ms-2">Filtres actifs</span>
+        {% endif %}
+    </span>
+</div>
+
+<!-- Buildings Table -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Code</th>
+                        <th>Nom du Bâtiment</th>
+                        <th>Adresse</th>
+                        <th>Zone</th>
+                        <th>Type</th>
+                        <th>Protection</th>
+                        <th>État</th>
+                        <th>Coordonnées</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if buildings %}
+                        {% for b in buildings %}
+                        <tr>
+                            <td><strong>{{ b[0] }}</strong></td>
+                            <td>{{ b[1] }}</td>
+                            <td>{{ b[2] or '-' }}</td>
+                            <td>
+                                {% if b[3] %}
+                                <span class="badge bg-primary">{{ b[3] }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ b[4] or '-' }}</td>
+                            <td>
+                                {% if b[5] %}
+                                <span class="badge bg-info">{{ b[5] }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if b[9] %}
+                                    {% if b[9] == 'Bon' %}
+                                    <span class="badge bg-success">{{ b[9] }}</span>
+                                    {% elif b[9] == 'Moyen' %}
+                                    <span class="badge bg-warning text-dark">{{ b[9] }}</span>
+                                    {% elif b[9] == 'Dégradé' %}
+                                    <span class="badge bg-orange text-white" style="background-color: #e67e22;">{{ b[9] }}</span>
+                                    {% elif b[9] == 'En ruine' %}
+                                    <span class="badge bg-danger">{{ b[9] }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ b[9] }}</span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="badge bg-secondary">Non inspecté</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if b[7] and b[8] %}
+                                <small class="text-success"><i class="bi bi-geo-alt-fill"></i> Oui</small>
+                                {% else %}
+                                <small class="text-muted"><i class="bi bi-geo-alt"></i> Non</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('buildings.view_building', id=b[0]) }}" 
+                                       class="btn btn-outline-primary" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('buildings.edit_building', id=b[0]) }}" 
+                                       class="btn btn-outline-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            title="Supprimer"
+                                            onclick="confirmDelete('{{ b[0] }}', '{{ b[1]|e }}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2 mb-0">
+                                    {% if current_search or current_zone or current_type or current_protection or current_etat %}
+                                    Aucun bâtiment ne correspond à vos critères de recherche.
+                                    <br><a href="{{ url_for('buildings.list_buildings') }}">Réinitialiser les filtres</a>
+                                    {% else %}
+                                    Aucun bâtiment enregistré.
+                                    <br><a href="{{ url_for('buildings.add_building') }}">Ajouter le premier bâtiment</a>
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le bâtiment <strong id="buildingName"></strong>?</p>
+                <p class="text-danger"><small>Cette action est irréversible et supprimera également toutes les inspections, interventions et documents associés.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Delete confirmation
+    function confirmDelete(id, name) {
+        document.getElementById('buildingName').textContent = name;
+        document.getElementById('deleteForm').action = `/buildings/delete/${id}`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    // Auto-submit on filter change (optional - for better UX)
+    document.querySelectorAll('#filterForm select').forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('filterForm').submit();
+        });
+    });
+    
+    // Search on Enter key
+    document.getElementById('search').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('filterForm').submit();
+        }
+    });
+</script>
+{% endblock %}

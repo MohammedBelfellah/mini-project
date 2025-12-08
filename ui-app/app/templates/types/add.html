@@ -1,0 +1,59 @@
+{% extends "base.html" %} {% block title %}Ajouter un Type de Bâtiment{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-plus-circle"></i> Ajouter un Type de Bâtiment</h1>
+  <a href="{{ url_for('types.list_types') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('types.add_type') }}">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="libelle_type" class="form-label">
+            Type de Bâtiment <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="libelle_type"
+            name="libelle_type"
+            list="types_list"
+            placeholder="Ex: Religieux, Civil, Militaire..."
+            required
+          />
+          <datalist id="types_list">
+            <option value="Religieux"></option>
+            <option value="Civil"></option>
+            <option value="Militaire"></option>
+            <option value="Commercial"></option>
+            <option value="Résidentiel"></option>
+            <option value="Administratif"></option>
+            <option value="Éducatif"></option>
+            <option value="Industriel"></option>
+            <option value="Culturel"></option>
+            <option value="Hospitalier"></option>
+            <option value="Funéraire"></option>
+            <option value="Agricole"></option>
+          </datalist>
+
+          <div class="form-text">
+            Catégorie ou type architectural du bâtiment
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{{ url_for('types.list_types') }}" class="btn btn-secondary">
+          <i class="bi bi-x-circle"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-circle"></i> Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

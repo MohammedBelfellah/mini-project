@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter une Inspection{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-plus-circle"></i> Ajouter une Inspection</h1>
+    <a href="{{ url_for('inspections.list_inspections') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('inspections.add_inspection') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="code_batiment" class="form-label">Bâtiment <span class="text-danger">*</span></label>
+                    <select class="form-select" id="code_batiment" name="code_batiment" required>
+                        <option value="">-- Sélectionner un bâtiment --</option>
+                        {% for building in buildings %}
+                        <option value="{{ building[0] }}">{{ building[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="date_visite" class="form-label">Date de Visite <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="date_visite" name="date_visite" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="etat_constate" class="form-label">État Constaté <span class="text-danger">*</span></label>
+                <select class="form-select" id="etat_constate" name="etat_constate" required>
+                    <option value="">-- Sélectionner --</option>
+                    {% for etat in etats %}
+                    <option value="{{ etat }}">{{ etat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="rapport" class="form-label">Rapport d'Inspection</label>
+                <textarea class="form-control" id="rapport" name="rapport" rows="6" placeholder="Détails de l'inspection..."></textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{{ url_for('inspections.list_inspections') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Liste des Zones Urbaines{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-geo-alt"></i> Liste des Zones Urbaines</h1>
+    <a href="{{ url_for('zones.add_zone') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Ajouter une Zone
+    </a>
+</div>
+
+<!-- Search and Filter Card -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Recherche et Filtres</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('zones.list_zones') }}" id="filterForm">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label for="search" class="form-label"><i class="bi bi-search"></i> Recherche</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Nom de la zone..." value="{{ current_search }}">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="type_zone" class="form-label"><i class="bi bi-tag"></i> Type de Zone</label>
+                    <select class="form-select" id="type_zone" name="type_zone">
+                        <option value="">Tous les types</option>
+                        {% for t in types %}
+                        <option value="{{ t[0] }}" {% if current_type == t[0] %}selected{% endif %}>
+                            {{ t[0] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-funnel"></i> Filtrer
+                    </button>
+                    <a href="{{ url_for('zones.list_zones') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted">
+        <i class="bi bi-geo-alt"></i> {{ zones|length }} zone(s) trouvée(s)
+    </span>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom de la Zone</th>
+                        <th>Type</th>
+                        <th>Bâtiments</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if zones %}
+                        {% for z in zones %}
+                        <tr>
+                            <td><strong>{{ z[0] }}</strong></td>
+                            <td>
+                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                                {{ z[1] }}
+                            </td>
+                            <td>
+                                {% if z[2] %}
+                                <span class="badge bg-secondary">{{ z[2] }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ z[3] }} bâtiment(s)</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('zones.view_zone', id=z[0]) }}" 
+                                       class="btn btn-outline-primary" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('zones.edit_zone', id=z[0]) }}" 
+                                       class="btn btn-outline-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            title="Supprimer"
+                                            data-id="{{ z[0] }}"
+                                            data-name="{{ z[1]|e }}"
+                                            data-count="{{ z[3] }}"
+                                            onclick="confirmDelete(this.dataset.id, this.dataset.name, this.dataset.count)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2 mb-0">Aucune zone trouvée.</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer la zone <strong id="zoneName"></strong>?</p>
+                <div id="warningMessage" class="alert alert-warning d-none">
+                    <i class="bi bi-exclamation-triangle"></i> Cette zone contient des bâtiments et ne peut pas être supprimée.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" id="deleteBtn">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete(id, name, count) {
+        document.getElementById('zoneName').textContent = name;
+        document.getElementById('deleteForm').action = `/zones/delete/${id}`;
+        
+        const warningMsg = document.getElementById('warningMessage');
+        const deleteBtn = document.getElementById('deleteBtn');
+        
+        if (parseInt(count) > 0) {
+            warningMsg.classList.remove('d-none');
+            deleteBtn.disabled = true;
+        } else {
+            warningMsg.classList.add('d-none');
+            deleteBtn.disabled = false;
+        }
+        
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    document.getElementById('type_zone').addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+</script>
+{% endblock %}

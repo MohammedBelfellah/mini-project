@@ -1,0 +1,59 @@
+{% extends "base.html" %} {% block title %}Modifier le Niveau de Protection{%
+endblock %} {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1><i class="bi bi-pencil"></i> Modifier le Niveau de Protection</h1>
+  <a
+    href="{{ url_for('protections.view_protection', id=protection[0]) }}"
+    class="btn btn-secondary"
+  >
+    <i class="bi bi-arrow-left"></i> Retour
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form
+      method="POST"
+      action="{{ url_for('protections.edit_protection', id=protection[0]) }}"
+    >
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="niveau" class="form-label">
+            Niveau de Protection <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="niveau"
+            name="niveau"
+            value="{{ protection[1] }}"
+            list="niveaux_list"
+            required
+          />
+          <datalist id="niveaux_list">
+            <option value="Classé"></option>
+            <option value="Inscrit"></option>
+            <option value="Non protégé"></option>
+            <option value="En cours de classement"></option>
+            <option value="Protection locale"></option>
+            <option value="Monument historique"></option>
+            <option value="Patrimoine mondial UNESCO"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a
+          href="{{ url_for('protections.view_protection', id=protection[0]) }}"
+          class="btn btn-secondary"
+        >
+          <i class="bi bi-x-circle"></i> Annuler
+        </a>
+        <button type="submit" class="btn btn-warning">
+          <i class="bi bi-check-circle"></i> Mettre à Jour
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
