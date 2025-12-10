@@ -7,7 +7,6 @@ def get_db():
     current application context.
     """
     if 'db' not in g:
-        # Use psycopg.connect instead of psycopg2.connect
         g.db = psycopg.connect(current_app.config['DATABASE_URL'])
     return g.db
 
