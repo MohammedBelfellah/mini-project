@@ -1,9 +1,13 @@
 from flask import Flask
 from config import Config
+from flask_cors import CORS
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    # Enable CORS for all routes
+    CORS(app)
     
     # Initialize database connection handling
     from . import db
@@ -13,6 +17,7 @@ def create_app(config_class=Config):
     from .routes import (buildings_bp, inspections_bp, interventions_bp, 
                          dashboard_bp, prestataires_bp, zones_bp,
                          protections_bp, proprietaires_bp, types_bp, documents_bp)
+    
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(buildings_bp)
     app.register_blueprint(inspections_bp)
